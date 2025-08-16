@@ -1,6 +1,4 @@
-﻿using System.Data;
-
-namespace OperationsLogic;
+﻿namespace OperationsLogic;
 
 public class DualSimplex
 {
@@ -8,103 +6,88 @@ public class DualSimplex
     {
         bool solutionReached = false;
 
-        int iteration = 0;
+        int iteration = 1;
         do
         {
+            Console.WriteLine($"\nIteration {iteration}");
+
             int pivotRowIndex = SimplexUtils.FindMostNegativeRHSIndex(rhsValues);
 
             if (pivotRowIndex != -1)
             {
-                Console.WriteLine($"\nIteration {iteration}");
-                iteration++;
-                (xValues, rhsValues, sValues, eValues) = PivotOnTable(xValues, rhsValues, sValues, eValues);
+                (xValues, rhsValues, sValues, eValues, _) = PivotOnTable(xValues, rhsValues, sValues, eValues);
                 SimplexUtils.DisplayTable(xValues, rhsValues, sValues, eValues);
+                iteration++;
             }
             else
             {
+                Console.WriteLine("Optimal: No negative RHS values");
+                SimplexUtils.DisplayTable(xValues, rhsValues, sValues, eValues, null);
                 solutionReached = true;
             }
         }
         while (!solutionReached);
     }
-    public static (double[,] xValues, double[] rhsValues, double[,]? sValues, double[,]? eValues) PivotOnTable(double[,] xValues, double[] rhsValues, double[,]? sValues = null, double[,]? eValues = null)
+    public static (double[,] xValues, double[] rhsValues, double[,]? sValues, double[,]? eValues, double[,]? thetaValues) PivotOnTable(double[,] xValues, double[] rhsValues, double[,]? sValues = null, double[,]? eValues = null)
     {
         int xColumnCount = xValues.GetLength(1);
-
-        int sColumnCount = 0;
-        if (sValues != null)
-        {
-            sColumnCount = sValues.GetLength(1);
-        }
-
-        int eColumnCount = 0;
-        if (eValues != null)
-        {
-            eColumnCount = eValues.GetLength(1);
-        }
+        int sColumnCount = sValues != null ? sValues.GetLength(1) : 0;
+        int eColumnCount = eValues != null ? eValues.GetLength(1) : 0;
+        int maxColumnCount = Math.Max(Math.Max(xColumnCount, sColumnCount), eColumnCount);
 
         int pivotRowIndex = SimplexUtils.FindMostNegativeRHSIndex(rhsValues);
 
         // If an index is found, begin pivoting
         if (pivotRowIndex != -1)
         {
-            int totalColumnCount = xColumnCount + sColumnCount + eColumnCount;
-            double[] thetaValues = new double[totalColumnCount];
-            int thetaIndex = 0;
+            double[,] thetaValues = new double[3, maxColumnCount]; // Row 0: X, Row 1: S, Row 2: E
             double thetaValue;
             for (int col = 0; col < xColumnCount; col++)
             {
-                if (xValues[pivotRowIndex, col] < 0)
+                if (xValues[pivotRowIndex, col] is < 0 and not 0)
                 {
                     double zValue = xValues[0, col];
                     thetaValue = Math.Abs(zValue / xValues[pivotRowIndex, col]);
-                    thetaValues[thetaIndex] = thetaValue;
+
+                    // Ensures any NAN values and infinite values do not slip through by setting them to 0
+                    thetaValues[0, col] = double.IsNaN(thetaValue) || double.IsInfinity(thetaValue) ? 0 : thetaValue;
                 }
-                thetaIndex++;
             }
 
             for (int col = 0; col < sColumnCount; col++)
             {
-                if (sValues != null && sValues[pivotRowIndex, col] < 0)
+                if (sValues != null && sValues[pivotRowIndex, col] < 0 && sValues[pivotRowIndex, col] != 0)
                 {
                     thetaValue = Math.Abs(sValues[0, col] / sValues[pivotRowIndex, col]);
-                    thetaValues[thetaIndex] = thetaValue;
-                    thetaIndex++;
+                    thetaValues[1, col] = double.IsNaN(thetaValue) || double.IsInfinity(thetaValue) ? 0 : thetaValue;
                 }
             }
 
             for (int col = 0; col < eColumnCount; col++)
             {
-                if (eValues != null && eValues[pivotRowIndex, col] < 0)
+                if (eValues != null && eValues[pivotRowIndex, col] < 0 && eValues[pivotRowIndex, col] != 0)
                 {
                     thetaValue = Math.Abs(eValues[0, col] / eValues[pivotRowIndex, col]);
-                    thetaValues[thetaIndex] = thetaValue;
-                    thetaIndex++;
+                    thetaValues[2, col] = double.IsNaN(thetaValue) || double.IsInfinity(thetaValue) ? 0 : thetaValue;
                 }
             }
 
-            for (int i = 0; i < thetaValues.Length; i++)
-            {
-                Console.WriteLine($"thetaValues[{i}] = {thetaValues[i]}");
-            }
-
-            // It finds the correct column but since we have x, s and e values split, may give index out of bounds if not an xValue. 
-            int pivotColumnIndex = SimplexUtils.FindLeastPositiveThetaIndex(thetaValues);
+            (int pivotColumnIndex, SimplexUtils.ColumnGroup columnGroup) = SimplexUtils.FindLeastPositiveThetaIndex(thetaValues, xColumnCount, sColumnCount, eColumnCount);
             if (pivotColumnIndex != -1)
             {
-                (double[,] updatedX, double[] updatedRhs, double[,]? updatedS, double[,]? updatedE) = SimplexUtils.PerformPivot(pivotRowIndex, pivotColumnIndex, xValues, rhsValues, sValues, eValues);
-                return (updatedX, updatedRhs, updatedS, updatedE);
+                (double[,] updatedX, double[] updatedRhs, double[,]? updatedS, double[,]? updatedE) = SimplexUtils.PerformPivot(pivotRowIndex, pivotColumnIndex, xValues, rhsValues, sValues, eValues, columnGroup);
+                return (updatedX, updatedRhs, updatedS, updatedE, thetaValues);
             }
             else
             {
-                // Likely Infeasible
-                return (xValues, rhsValues, sValues, eValues);
+                Console.WriteLine("Infeasible: No valid pivot column found");
+                return (xValues, rhsValues, sValues, eValues, thetaValues);
             }
         }
         else
         {
-            // Determine if table is optimal
-            return (xValues, rhsValues, sValues, eValues);
+            Console.WriteLine("Optimal: No negative RHS values");
+            return (xValues, rhsValues, sValues, eValues, null);
         }
     }
 }
