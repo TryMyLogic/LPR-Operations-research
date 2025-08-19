@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="LpSolveDotNet" Version="4.0.0" />
+    <PackageReference Include="LpSolveDotNet.Native.win-x64" Version="4.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OperationsLogic\OperationsLogic.csproj" />
   </ItemGroup>
 
