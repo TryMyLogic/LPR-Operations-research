@@ -142,33 +142,33 @@ public class CanonicalTableau
                     throw new ArgumentException($"Invalid value at [{row},{col}]: NaN or Infinity.");
     }
 
-    public string DisplayTableau(double[]? thetas = null,bool printToConsole = false)
+    public string DisplayTableau(double[]? thetas = null, bool printToConsole = false)
     {
         StringBuilder sb = new();
 
-        sb.Append("T\t");
+        _ = sb.Append("T\t");
         for (int i = 0; i < DecisionVars; i++)
-            sb.Append($"x{i + 1}\t");
+            _ = sb.Append($"x{i + 1}\t");
         for (int i = 0; i < ExcessVars; i++)
-            sb.Append($"E{i + 1}\t");
+            _ = sb.Append($"E{i + 1}\t");
         for (int i = 0; i < SlackVars; i++)
-            sb.Append($"S{i + 1}\t");
-        sb.Append("RHS\n");
+            _ = sb.Append($"S{i + 1}\t");
+        _ = sb.Append("RHS\n");
 
         for (int row = 0; row < Rows; row++)
         {
-            sb.Append(row == 0 ? "Z\t" : $"{row}\t");
+            _ = sb.Append(row == 0 ? "Z\t" : $"{row}\t");
             for (int col = 0; col < TotalVars + 1; col++)
-                sb.Append($"{Math.Round(Tableau[row, col], 3)}\t");
-            sb.Append('\n');
+                _ = sb.Append($"{Math.Round(Tableau[row, col], 3)}\t");
+            _ = sb.Append('\n');
         }
 
         if (thetas != null)
         {
-            sb.Append("Theta\t");
+            _ = sb.Append("Theta\t");
             for (int col = 0; col < TotalVars; col++)
-                sb.Append($"{Math.Round(thetas[col], 3)}\t");
-            sb.AppendLine();
+                _ = sb.Append($"{Math.Round(thetas[col], 3)}\t");
+            _ = sb.AppendLine();
         }
 
         if (printToConsole)

@@ -6,39 +6,40 @@ namespace OperationsLogic.Algorithms;
 
 public class DualSimplex
 {
-    public static string Solve(CanonicalTableau tableau)
+    public static (string, CanonicalTableau?) Solve(CanonicalTableau tableau, int iteration = 0)
     {
         StringBuilder sb = new();
 
-        int iteration = 0;
+        int initialIteration = iteration;
         while (true)
         {
             int pivotRowIndex = FindMostNegativeRHSIndex(tableau);
 
             if (pivotRowIndex == -1)
             {
-                sb.AppendLine($"Iteration {iteration}");
-                sb.AppendLine("Optimal: No negative RHS values");
-                sb.AppendLine(tableau.DisplayTableau());
+                _ = sb.AppendLine($"Iteration {iteration}");
+                _ = sb.AppendLine("Optimal: No negative RHS values");
+                _ = sb.AppendLine(tableau.DisplayTableau());
                 break;
             }
 
             (int pivotColumn, double[] thetas) = DeterminePivotColumnAndThetas(tableau, pivotRowIndex);
 
-            if (iteration == 0)
+            if (iteration == initialIteration)
             {
-                sb.AppendLine("Initial Tableau:");
-                sb.AppendLine(tableau.DisplayTableau(thetas));
+                _ = sb.AppendLine("Initial Dual Simplex Tableau:");
+                _ = sb.AppendLine($"Iteration {iteration}");
+                _ = sb.AppendLine(tableau.DisplayTableau(thetas));
             }
             else
             {
-                sb.AppendLine($"Iteration {iteration}");
-                sb.AppendLine(tableau.DisplayTableau(thetas));
+                _ = sb.AppendLine($"Iteration {iteration}");
+                _ = sb.AppendLine(tableau.DisplayTableau(thetas));
             }
 
             if (pivotColumn == -1)
             {
-                sb.AppendLine("Infeasible: No valid pivot column found");
+                _ = sb.AppendLine("Infeasible: No valid pivot column found");
                 break;
             }
 
@@ -46,7 +47,7 @@ public class DualSimplex
             iteration++;
         }
 
-        return sb.ToString();
+        return (sb.ToString(), tableau);
     }
 
     public static int FindMostNegativeRHSIndex(CanonicalTableau tableau)
