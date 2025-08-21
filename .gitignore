@@ -482,3 +482,4 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+/OperationsResearch/OperationsApp/SolverForm.Designer.cs
