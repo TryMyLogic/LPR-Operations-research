@@ -1,5 +1,7 @@
 ﻿using System.Text;
 
+using OperationsLogic.Algorithms;
+
 namespace OperationsLogic.Model;
 public class CanonicalTableau
 {
@@ -31,7 +33,7 @@ public class CanonicalTableau
 
         IsMaximization = objParts[0].Equals("max", StringComparison.CurrentCultureIgnoreCase);
         DecisionVars = objParts.Length - 1; // objPart[0] is max or min. Remove it
-        //Console.WriteLine(DecisionVars);
+
         double[] objCoefficients = new double[DecisionVars];
         for (int i = 0; i < DecisionVars; i++)
         {
@@ -142,7 +144,7 @@ public class CanonicalTableau
                     throw new ArgumentException($"Invalid value at [{row},{col}]: NaN or Infinity.");
     }
 
-    public string DisplayTableau(double[]? thetas = null,bool printToConsole = false)
+    public string DisplayTableau(double[]? thetas = null, bool printToConsole = false)
     {
         StringBuilder sb = new();
 
@@ -177,15 +179,7 @@ public class CanonicalTableau
         return sb.ToString();
     }
 
-
-    // the FindPivotRow needs to be made by as seperate model, e.g DualSimplex which uses CanonicalTablue as a param.
-    // How you pivot on dual simplex is not the same as primal simplex
-    //public int FindPivotRow()
-    //{
-
-    //}
-
-    // Return new Tableau so we can call Display on each iteration.
+   
     public CanonicalTableau PerformPivot(int pivotRow, int pivotColumn)
     {
         if (pivotRow < 0 || pivotRow >= Rows || pivotColumn < 0 || pivotColumn >= TotalVars)
@@ -206,6 +200,174 @@ public class CanonicalTableau
         }
 
         return new CanonicalTableau(DecisionVars, ExcessVars, SlackVars, IsMaximization, SignRestrictions, newTableau);
+    }
+
+    // TODO: Using CanonicalTableau 3 times is inefficient. Come back to improve if there is time
+    public CanonicalTableau AddConstraint(double[] coefficients, string relation, double rhs)
+    {
+        if (coefficients.Length == 0)
+            throw new ArgumentException("Must have atleast one coefficient to add constraint.");
+        if (coefficients.Length > DecisionVars)
+            throw new ArgumentException($"Number of coefficients ({coefficients.Length}) exceeds number of decision variables ({DecisionVars}).");
+        if (!ValidConstraintOperators.Contains(relation))
+            throw new ArgumentException($"Invalid relation: {relation}. Must be one of the following relations - {string.Join(", ", ValidConstraintOperators)}.");
+        if (double.IsNaN(rhs) || double.IsInfinity(rhs))
+            throw new ArgumentException($"Invalid RHS value: {rhs}. Must be a finite number.");
+
+        foreach (double coeff in coefficients)
+            if (double.IsNaN(coeff) || double.IsInfinity(coeff))
+                throw new ArgumentException($"Invalid coefficient value: {coeff}. Must be a finite number.");
+
+        // Get list of basicVariablesIndices prior to changes. This is to detect conflicts
+        List<int> basicVariablesIndices = [];
+        for (int col = 0; col < DecisionVars; col++)
+        {
+            if (IsBasicVariable(col))
+            {
+                basicVariablesIndices.Add(col);
+            }
+        }
+
+        int newSlackVars = SlackVars + (relation == "<=" ? 1 : 0);
+        int newExcessVars = ExcessVars + (relation == ">=" ? 1 : 0);
+        if (relation == "=")
+        {
+            newSlackVars++;
+            newExcessVars++;
+        }
+        int newTotalVars = DecisionVars + newExcessVars + newSlackVars;
+        int newRows = Rows + 1; // Only one constraint added at a time with this function. Multiple can be added via Loop
+
+        double[,] newTableau = new double[newRows, newTotalVars + 1];
+
+        // Copy original tables contents to new table
+        for (int row = 0; row < Rows; row++)
+            for (int col = 0; col < TotalVars + 1; col++)
+                if(col == TotalVars)
+                {
+                    newTableau[row, newTotalVars] = Tableau[row, col];
+                }
+                else
+                {
+                    newTableau[row, col] = Tableau[row, col];
+                } 
+
+        // Set new row contents
+        int newRow = Rows;
+        for (int col = 0; col < DecisionVars; col++)
+        {
+            newTableau[newRow, col] = col < coefficients.Length ? (relation == ">=" ? -coefficients[col] : coefficients[col]) : 0; // Implied 0 for missing coefficients
+        }
+        newTableau[newRow, newTotalVars] = relation == ">=" ? -rhs : rhs;
+
+        if (relation == "<=")
+        {
+            newTableau[newRow, DecisionVars + ExcessVars + SlackVars] = 1;
+        }
+        else if (relation == ">=")
+        {
+            newTableau[newRow, DecisionVars + ExcessVars] = 1;
+        }
+        else if (relation == "=")
+        {
+            newTableau[newRow, DecisionVars + ExcessVars + SlackVars] = 1;
+            newTableau[newRow, DecisionVars + ExcessVars] = 1;
+        }
+
+        for (int row = 0; row < newRows; row++)
+            for (int col = 0; col < newTotalVars + 1; col++)
+                if (double.IsNaN(newTableau[row, col]) || double.IsInfinity(newTableau[row, col]))
+                    throw new ArgumentException($"Invalid value at [{row},{col}]: NaN or Infinity.");
+
+        CanonicalTableau conflictTableau = new(DecisionVars, newExcessVars, newSlackVars, IsMaximization, SignRestrictions, newTableau);
+
+        CanonicalTableau? resultTableau = null;
+        foreach (int basicVariableIndex in basicVariablesIndices)
+        {
+            bool previouslyBasicRemainsBasic = conflictTableau.IsBasicVariable(basicVariableIndex);
+            if (previouslyBasicRemainsBasic != true)
+            {
+                // Need to resolve conflict between two 1's in single column, so it may be basic again
+                double[] column = conflictTableau.GetColumn(basicVariableIndex);
+
+                List<int> oneRows = [];
+                for (int row = 0; row < newRows; row++)
+                {
+                    double value = column[row];
+                    if (value == 1)
+                    {
+                        oneRows.Add(row);
+                    }
+                }
+
+                if (oneRows.Count >= 2)
+                {
+                    // Subtract new row from the original basic row
+                    int originalRow = oneRows.First(row => row != newRow);
+
+                    for (int col = 0; col < newTotalVars + 1; col++)
+                    {
+                        newTableau[newRows - 1, col] = newTableau[originalRow, col] - newTableau[newRows - 1, col];
+                    }
+
+                    // If RHS is positive, multiply row by -1 for dual simplex
+                    if (newTableau[newRows - 1, newTotalVars] > 0)
+                    {
+                        for (int col = 0; col < newTotalVars + 1; col++)
+                        {
+                            newTableau[newRows - 1, col] = newTableau[newRows - 1, col] * -1 == 0 ? 0 : newTableau[newRows - 1, col] * -1;
+                        }
+                    }
+
+                    if (!IsBasicVariable(basicVariableIndex))
+                        throw new InvalidOperationException($"Failed to restore basic variable at column {basicVariableIndex}.");
+
+                    conflictTableau = new(DecisionVars, newExcessVars, newSlackVars, IsMaximization, SignRestrictions, newTableau);
+
+                    (_, resultTableau) = DualSimplex.Solve(conflictTableau);
+                }
+                else
+                {
+                    throw new InvalidOperationException("There should always be at least 2 values of one conflicting when adding a constraint");
+                }
+
+            }
+        }
+
+        // Whatever uses this function needs to check that the row count has increased for success
+        return resultTableau ?? this;
+    }
+
+    public double[] GetColumn(int columnNo)
+    {
+        if (columnNo < 0 || columnNo >= TotalVars + 1)
+            throw new ArgumentException($"Invalid column index provided: {columnNo}");
+
+        double[] column = new double[Rows];
+        for (int i = 0; i < Rows; i++)
+        {
+            column[i] = Tableau[i, columnNo];
+        }
+        return column;
+    }
+
+    public bool IsBasicVariable(int columnNo)
+    {
+        double[] column = GetColumn(columnNo);
+        int oneCount = 0;
+        int nonZeroCount = 0;
+        foreach (double value in column)
+        {
+            if (value != 0)
+            {
+                nonZeroCount++;
+            }
+            if (value == 1)
+            {
+                oneCount++;
+            }
+        }
+        return nonZeroCount == 1 && oneCount == 1;
     }
 
     private CanonicalTableau(int decisionVars, int excessVars, int slackVars, bool isMaximization, string[] signRestrictions, double[,] tableau)

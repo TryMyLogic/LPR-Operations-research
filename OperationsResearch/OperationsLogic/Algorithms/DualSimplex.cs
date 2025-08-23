@@ -6,7 +6,7 @@ namespace OperationsLogic.Algorithms;
 
 public class DualSimplex
 {
-    public static string Solve(CanonicalTableau tableau)
+    public static (string, CanonicalTableau tableau)  Solve(CanonicalTableau tableau)
     {
         StringBuilder sb = new();
 
@@ -46,7 +46,7 @@ public class DualSimplex
             iteration++;
         }
 
-        return sb.ToString();
+        return (sb.ToString(),tableau);
     }
 
     public static int FindMostNegativeRHSIndex(CanonicalTableau tableau)
