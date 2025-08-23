@@ -1,4 +1,7 @@
+using LPR381_Windows_Project;
+
 namespace OperationsApp;
+
 internal static class Program
 {
     /// <summary>
