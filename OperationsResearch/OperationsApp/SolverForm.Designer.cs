@@ -176,7 +176,7 @@
             tabSimplex.Padding = new Padding(3);
             tabSimplex.Size = new Size(1720, 853);
             tabSimplex.TabIndex = 0;
-            tabSimplex.Text = "Simplex Section";
+            tabSimplex.Text = " Simplex Section";
             // 
             // button3
             // 

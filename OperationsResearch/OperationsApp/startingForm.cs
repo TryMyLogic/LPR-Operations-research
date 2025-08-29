@@ -37,7 +37,7 @@ public partial class startingForm : Form
             txtFileOutput.Text = path;
 
             try
-            {
+            { 
                 FileParser parser = new();
                 model1 = parser.Parse(path);
 
