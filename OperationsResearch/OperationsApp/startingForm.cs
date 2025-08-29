@@ -17,7 +17,7 @@ using OperationsLogic.Misc;
 namespace OperationsApp;
 public partial class startingForm : Form
 {
-    private LinearModel model;
+    public LinearModel model1;
     private string outputText = string.Empty;
     private readonly Dictionary<string, ISolver> solvers = [];
     public startingForm()
@@ -39,9 +39,9 @@ public partial class startingForm : Form
             try
             {
                 FileParser parser = new();
-                model = parser.Parse(path);
+                model1 = parser.Parse(path);
 
-                rtbOutput.Text = $"Model Type: {model.Type}\nObjective: {string.Join(", ", model.ObjectiveCoefficients)}\nConstraints: {model.Constraints.Count}\nSigns: {string.Join(" ", model.SignRestrictions)}";
+                rtbOutput.Text = $"Model Type: {model1.Type}\nObjective: {string.Join(", ", model1.ObjectiveCoefficients)}\nConstraints: {model1.Constraints.Count}\nSigns: {string.Join(" ", model1.SignRestrictions)}";
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ public partial class startingForm : Form
 
     private void btnContinue_Click(object sender, EventArgs e)
     {
-        SolverForm solverForm = new SolverForm();
+        SolverForm solverForm = new SolverForm(model1);
         solverForm.Show();
         this.Hide();
 

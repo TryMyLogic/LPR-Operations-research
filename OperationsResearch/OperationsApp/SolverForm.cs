@@ -1,4 +1,6 @@
-﻿using OperationsLogic.Algorithms;
+﻿using OperationsApp;
+
+using OperationsLogic.Algorithms;
 using OperationsLogic.Misc;
 
 namespace LPR381_Windows_Project;
@@ -9,10 +11,14 @@ public partial class SolverForm : Form
     private string outputText = string.Empty;
     private readonly Dictionary<string, ISolver> solvers = [];
 
-    public SolverForm()
+    public SolverForm(LinearModel model1)
     {
         InitializeComponent();
         InitializeSolvers();
+        this.StartPosition = FormStartPosition.CenterScreen;
+        this.WindowState = FormWindowState.Normal;
+
+        model = model1;
     }
 
     private void InitializeSolvers()
@@ -108,5 +114,96 @@ public partial class SolverForm : Form
     private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
     {
 
+    }
+
+    private void SolverForm_Load(object sender, EventArgs e)
+    {
+
+    }
+
+    private void btnExit_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
+
+    private void button2_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+        this.Hide();
+        startingForm startingForm = new startingForm();
+        startingForm.Show();
+    }
+
+    private void button4_Click(object sender, EventArgs e)
+    {
+        this.Hide();
+        startingForm startingForm = new startingForm();
+        startingForm.Show();
+    }
+
+    private void button5_Click(object sender, EventArgs e)
+    {
+        this.Hide();
+        startingForm startingForm = new startingForm();
+        startingForm.Show();
+    }
+
+    private void button6_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(outputText))
+        {
+            _ = MessageBox.Show("No output to save. Solve the model first.", "Warning");
+            return;
+        }
+
+        using SaveFileDialog saveFileDialog = new();
+        saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                File.WriteAllText(saveFileDialog.FileName, outputText);
+                txtSaveLocation.Text = saveFileDialog.FileName;
+                _ = MessageBox.Show("Output saved successfully.", "Success");
+            }
+            catch (Exception ex)
+            {
+                _ = MessageBox.Show("Error saving file: " + ex.Message, "Error");
+            }
+        }
+    }
+
+    private void button7_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(outputText))
+        {
+            _ = MessageBox.Show("No output to save. Solve the model first.", "Warning");
+            return;
+        }
+
+        using SaveFileDialog saveFileDialog = new();
+        saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                File.WriteAllText(saveFileDialog.FileName, outputText);
+                txtSaveLocation.Text = saveFileDialog.FileName;
+                _ = MessageBox.Show("Output saved successfully.", "Success");
+            }
+            catch (Exception ex)
+            {
+                _ = MessageBox.Show("Error saving file: " + ex.Message, "Error");
+            }
+        }
     }
 }

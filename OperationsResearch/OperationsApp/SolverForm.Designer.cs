@@ -28,8 +28,23 @@
             lblOutputHeading = new Label();
             tabControl1 = new TabControl();
             tabSimplex = new TabPage();
+            button3 = new Button();
+            btnExit = new Button();
             tabBaB = new TabPage();
+            label1 = new Label();
+            richTextBox1 = new RichTextBox();
+            textBox1 = new TextBox();
+            button6 = new Button();
+            button4 = new Button();
+            button1 = new Button();
             tabCuttingPlane = new TabPage();
+            label2 = new Label();
+            richTextBox2 = new RichTextBox();
+            textBox2 = new TextBox();
+            button7 = new Button();
+            button5 = new Button();
+            button2 = new Button();
+            tabSenAnalysis = new TabPage();
             tabControl1.SuspendLayout();
             tabSimplex.SuspendLayout();
             tabBaB.SuspendLayout();
@@ -38,7 +53,7 @@
             // 
             // rtbOutput
             // 
-            rtbOutput.Location = new Point(1118, 66);
+            rtbOutput.Location = new Point(285, 59);
             rtbOutput.Margin = new Padding(4, 3, 4, 3);
             rtbOutput.Name = "rtbOutput";
             rtbOutput.Size = new Size(584, 707);
@@ -48,7 +63,7 @@
             // 
             // btnSaveLocation
             // 
-            btnSaveLocation.Location = new Point(1118, 779);
+            btnSaveLocation.Location = new Point(285, 779);
             btnSaveLocation.Margin = new Padding(4, 3, 4, 3);
             btnSaveLocation.Name = "btnSaveLocation";
             btnSaveLocation.Size = new Size(194, 54);
@@ -59,7 +74,7 @@
             // 
             // btnSimplex
             // 
-            btnSimplex.Location = new Point(648, 677);
+            btnSimplex.Location = new Point(19, 568);
             btnSimplex.Margin = new Padding(4, 3, 4, 3);
             btnSimplex.Name = "btnSimplex";
             btnSimplex.Size = new Size(258, 96);
@@ -70,7 +85,7 @@
             // 
             // btnRevisedSimplex
             // 
-            btnRevisedSimplex.Location = new Point(382, 677);
+            btnRevisedSimplex.Location = new Point(19, 670);
             btnRevisedSimplex.Margin = new Padding(4, 3, 4, 3);
             btnRevisedSimplex.Name = "btnRevisedSimplex";
             btnRevisedSimplex.Size = new Size(258, 96);
@@ -81,7 +96,7 @@
             // 
             // btnB_B
             // 
-            btnB_B.Location = new Point(20, 343);
+            btnB_B.Location = new Point(18, 569);
             btnB_B.Margin = new Padding(4, 3, 4, 3);
             btnB_B.Name = "btnB_B";
             btnB_B.Size = new Size(258, 96);
@@ -92,7 +107,7 @@
             // 
             // btnCuttingPlane
             // 
-            btnCuttingPlane.Location = new Point(24, 350);
+            btnCuttingPlane.Location = new Point(14, 679);
             btnCuttingPlane.Margin = new Padding(4, 3, 4, 3);
             btnCuttingPlane.Name = "btnCuttingPlane";
             btnCuttingPlane.Size = new Size(258, 96);
@@ -103,7 +118,7 @@
             // 
             // btnB_B_B
             // 
-            btnB_B_B.Location = new Point(286, 343);
+            btnB_B_B.Location = new Point(18, 671);
             btnB_B_B.Margin = new Padding(4, 3, 4, 3);
             btnB_B_B.Name = "btnB_B_B";
             btnB_B_B.Size = new Size(258, 96);
@@ -114,17 +129,17 @@
             // 
             // txtSaveLocation
             // 
-            txtSaveLocation.Location = new Point(1320, 804);
+            txtSaveLocation.Location = new Point(487, 804);
             txtSaveLocation.Margin = new Padding(4, 3, 4, 3);
             txtSaveLocation.Name = "txtSaveLocation";
-            txtSaveLocation.Size = new Size(297, 29);
+            txtSaveLocation.Size = new Size(382, 29);
             txtSaveLocation.TabIndex = 10;
             // 
             // lblOutputHeading
             // 
             lblOutputHeading.AutoSize = true;
             lblOutputHeading.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline, GraphicsUnit.Point, 0);
-            lblOutputHeading.Location = new Point(1118, 34);
+            lblOutputHeading.Location = new Point(285, 27);
             lblOutputHeading.Margin = new Padding(4, 0, 4, 0);
             lblOutputHeading.Name = "lblOutputHeading";
             lblOutputHeading.Size = new Size(537, 29);
@@ -136,6 +151,7 @@
             tabControl1.Controls.Add(tabSimplex);
             tabControl1.Controls.Add(tabBaB);
             tabControl1.Controls.Add(tabCuttingPlane);
+            tabControl1.Controls.Add(tabSenAnalysis);
             tabControl1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             tabControl1.Location = new Point(1, 0);
             tabControl1.Name = "tabControl1";
@@ -147,6 +163,8 @@
             // tabSimplex
             // 
             tabSimplex.BackColor = SystemColors.ActiveCaption;
+            tabSimplex.Controls.Add(button3);
+            tabSimplex.Controls.Add(btnExit);
             tabSimplex.Controls.Add(btnSimplex);
             tabSimplex.Controls.Add(lblOutputHeading);
             tabSimplex.Controls.Add(btnRevisedSimplex);
@@ -160,43 +178,209 @@
             tabSimplex.TabIndex = 0;
             tabSimplex.Text = "Simplex Section";
             // 
+            // button3
+            // 
+            button3.Location = new Point(1441, 802);
+            button3.Name = "button3";
+            button3.Size = new Size(135, 48);
+            button3.TabIndex = 14;
+            button3.Text = "Back";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
+            // 
+            // btnExit
+            // 
+            btnExit.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnExit.Location = new Point(1582, 802);
+            btnExit.Name = "btnExit";
+            btnExit.Size = new Size(135, 48);
+            btnExit.TabIndex = 13;
+            btnExit.Text = "Exit";
+            btnExit.UseVisualStyleBackColor = true;
+            btnExit.Click += btnExit_Click;
+            // 
             // tabBaB
             // 
             tabBaB.BackColor = SystemColors.ActiveCaption;
+            tabBaB.Controls.Add(label1);
+            tabBaB.Controls.Add(richTextBox1);
+            tabBaB.Controls.Add(textBox1);
+            tabBaB.Controls.Add(button6);
+            tabBaB.Controls.Add(button4);
+            tabBaB.Controls.Add(button1);
             tabBaB.Controls.Add(btnB_B);
             tabBaB.Controls.Add(btnB_B_B);
             tabBaB.Location = new Point(4, 30);
             tabBaB.Name = "tabBaB";
             tabBaB.Padding = new Padding(3);
-            tabBaB.Size = new Size(1709, 851);
+            tabBaB.Size = new Size(1720, 853);
             tabBaB.TabIndex = 1;
             tabBaB.Text = "Branch And Bound Section";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline, GraphicsUnit.Point, 0);
+            label1.Location = new Point(284, 28);
+            label1.Margin = new Padding(4, 0, 4, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(537, 29);
+            label1.TabIndex = 19;
+            label1.Text = "Preview LP Form; Canonical Form; Final Answer:\r\n";
+            // 
+            // richTextBox1
+            // 
+            richTextBox1.Location = new Point(284, 60);
+            richTextBox1.Margin = new Padding(4, 3, 4, 3);
+            richTextBox1.Name = "richTextBox1";
+            richTextBox1.Size = new Size(584, 707);
+            richTextBox1.TabIndex = 16;
+            richTextBox1.Text = "";
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(486, 805);
+            textBox1.Margin = new Padding(4, 3, 4, 3);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(382, 29);
+            textBox1.TabIndex = 18;
+            // 
+            // button6
+            // 
+            button6.Location = new Point(284, 780);
+            button6.Margin = new Padding(4, 3, 4, 3);
+            button6.Name = "button6";
+            button6.Size = new Size(194, 54);
+            button6.TabIndex = 17;
+            button6.Text = "Save Location";
+            button6.UseVisualStyleBackColor = true;
+            button6.Click += button6_Click;
+            // 
+            // button4
+            // 
+            button4.Location = new Point(1441, 802);
+            button4.Name = "button4";
+            button4.Size = new Size(135, 48);
+            button4.TabIndex = 15;
+            button4.Text = "Back";
+            button4.UseVisualStyleBackColor = true;
+            button4.Click += button4_Click;
+            // 
+            // button1
+            // 
+            button1.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button1.Location = new Point(1582, 802);
+            button1.Name = "button1";
+            button1.Size = new Size(135, 48);
+            button1.TabIndex = 14;
+            button1.Text = "Exit";
+            button1.UseVisualStyleBackColor = true;
+            button1.Click += button1_Click;
             // 
             // tabCuttingPlane
             // 
             tabCuttingPlane.BackColor = SystemColors.ActiveCaption;
+            tabCuttingPlane.Controls.Add(label2);
+            tabCuttingPlane.Controls.Add(richTextBox2);
+            tabCuttingPlane.Controls.Add(textBox2);
+            tabCuttingPlane.Controls.Add(button7);
+            tabCuttingPlane.Controls.Add(button5);
+            tabCuttingPlane.Controls.Add(button2);
             tabCuttingPlane.Controls.Add(btnCuttingPlane);
             tabCuttingPlane.Location = new Point(4, 30);
             tabCuttingPlane.Name = "tabCuttingPlane";
-            tabCuttingPlane.Size = new Size(1709, 851);
+            tabCuttingPlane.Size = new Size(1720, 853);
             tabCuttingPlane.TabIndex = 2;
             tabCuttingPlane.Text = "Cutting Plane Section";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline, GraphicsUnit.Point, 0);
+            label2.Location = new Point(280, 36);
+            label2.Margin = new Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(537, 29);
+            label2.TabIndex = 19;
+            label2.Text = "Preview LP Form; Canonical Form; Final Answer:\r\n";
+            // 
+            // richTextBox2
+            // 
+            richTextBox2.Location = new Point(280, 68);
+            richTextBox2.Margin = new Padding(4, 3, 4, 3);
+            richTextBox2.Name = "richTextBox2";
+            richTextBox2.Size = new Size(584, 707);
+            richTextBox2.TabIndex = 16;
+            richTextBox2.Text = "";
+            // 
+            // textBox2
+            // 
+            textBox2.Location = new Point(482, 813);
+            textBox2.Margin = new Padding(4, 3, 4, 3);
+            textBox2.Name = "textBox2";
+            textBox2.Size = new Size(382, 29);
+            textBox2.TabIndex = 18;
+            // 
+            // button7
+            // 
+            button7.Location = new Point(280, 788);
+            button7.Margin = new Padding(4, 3, 4, 3);
+            button7.Name = "button7";
+            button7.Size = new Size(194, 54);
+            button7.TabIndex = 17;
+            button7.Text = "Save Location";
+            button7.UseVisualStyleBackColor = true;
+            button7.Click += button7_Click;
+            // 
+            // button5
+            // 
+            button5.Location = new Point(1441, 802);
+            button5.Name = "button5";
+            button5.Size = new Size(135, 48);
+            button5.TabIndex = 15;
+            button5.Text = "Back";
+            button5.UseVisualStyleBackColor = true;
+            button5.Click += button5_Click;
+            // 
+            // button2
+            // 
+            button2.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button2.Location = new Point(1582, 802);
+            button2.Name = "button2";
+            button2.Size = new Size(135, 48);
+            button2.TabIndex = 14;
+            button2.Text = "Exit";
+            button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click;
+            // 
+            // tabSenAnalysis
+            // 
+            tabSenAnalysis.BackColor = SystemColors.ActiveCaption;
+            tabSenAnalysis.Location = new Point(4, 30);
+            tabSenAnalysis.Name = "tabSenAnalysis";
+            tabSenAnalysis.Size = new Size(1720, 853);
+            tabSenAnalysis.TabIndex = 3;
+            tabSenAnalysis.Text = "Sensitivity Analysis";
             // 
             // SolverForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            AutoSizeMode = AutoSizeMode.GrowAndShrink;
             ClientSize = new Size(1730, 888);
             Controls.Add(tabControl1);
             Margin = new Padding(4, 3, 4, 3);
             Name = "SolverForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "SolverForm";
             WindowState = FormWindowState.Maximized;
             tabControl1.ResumeLayout(false);
             tabSimplex.ResumeLayout(false);
             tabSimplex.PerformLayout();
             tabBaB.ResumeLayout(false);
+            tabBaB.PerformLayout();
             tabCuttingPlane.ResumeLayout(false);
+            tabCuttingPlane.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -214,5 +398,20 @@
         private TabPage tabSimplex;
         private TabPage tabBaB;
         private TabPage tabCuttingPlane;
+        private Button btnExit;
+        private Button button1;
+        private Button button2;
+        private Button button3;
+        private Button button4;
+        private Button button5;
+        private Label label1;
+        private RichTextBox richTextBox1;
+        private TextBox textBox1;
+        private Button button6;
+        private Label label2;
+        private RichTextBox richTextBox2;
+        private TextBox textBox2;
+        private Button button7;
+        private TabPage tabSenAnalysis;
     }
 }
