@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.Text;
 
 using MathNet.Numerics.LinearAlgebra.Double;
 
@@ -8,6 +7,7 @@ using OperationsLogic.Algorithms;
 namespace OperationsLogic.Model;
 public class CanonicalTableau
 {
+    #region Properties & Constructors
     public int Rows { get; }
     public int DecisionVars { get; }
     public int ExcessVars { get; }
@@ -168,6 +168,20 @@ public class CanonicalTableau
         }
     }
 
+    public CanonicalTableau(int decisionVars, int excessVars, int slackVars, bool isMaximization, string[] signRestrictions, double[,] tableau, double[,] noncanonicaltableau)
+    {
+        DecisionVars = decisionVars;
+        ExcessVars = excessVars;
+        SlackVars = slackVars;
+        Rows = tableau.GetLength(0);
+        Tableau = tableau;
+        NonCanonicalTableau = noncanonicaltableau;
+        IsMaximization = isMaximization;
+        SignRestrictions = signRestrictions;
+    }
+    #endregion
+
+    #region Tableau manipulation
     public string DisplayTableau(double[]? thetas = null, bool displayNonCanonical = false)
     {
         StringBuilder sb = new();
@@ -201,7 +215,6 @@ public class CanonicalTableau
 
         return sb.ToString();
     }
-
 
     public CanonicalTableau PerformPivot(int pivotRow, int pivotColumn)
     {
@@ -361,45 +374,69 @@ public class CanonicalTableau
         return resultTableau ?? this;
     }
 
-    public void PerformMathPreliminaries()
+    // TODO: Similar to AddConstraint, using CanonicalTableau is likely inefficient. Come back to improve if there is time
+    public CanonicalTableau AddActivity(double[] newColumnValues)
     {
-        MathPreliminariesResult result = ComputeMathPreliminaries();
-        Tableau = ConstructMathPrelimOptimalTableau(result);
+        if (newColumnValues.Length != Rows)
+            throw new ArgumentException($"The number of column values must match the number of rows ({Rows}).");
 
-        Console.WriteLine("New Optimal Tableau:");
-        Console.WriteLine(DisplayTableau());
+        int newDecisionVars = DecisionVars + 1;
+        int newTotalVars = TotalVars + 1;
+        double[,] newNonCanonicalTableau = new double[Rows, newTotalVars + 1];
+        double[,] newTableau = new double[Rows, newTotalVars + 1];
+
+        for (int row = 0; row < Rows; row++)
+            for (int col = 0; col < newTotalVars + 1; col++)
+            {
+                // Copy old vars, insert new column, shift existing right
+                if (col < DecisionVars)
+                {
+                    newNonCanonicalTableau[row, col] = NonCanonicalTableau[row, col];
+                    newTableau[row, col] = Tableau[row, col];
+                }
+                else if (col == DecisionVars)
+                {
+                    newNonCanonicalTableau[row, col] = newColumnValues[row];
+                    newTableau[row, col] = row == 0 ? -newColumnValues[row] : newColumnValues[row]; 
+                }
+                else if (col < newTotalVars)
+                {
+                    newNonCanonicalTableau[row, col] = NonCanonicalTableau[row, col - 1];
+                    newTableau[row, col] = Tableau[row, col - 1];
+                }
+                else
+                {
+                    newNonCanonicalTableau[row, col] = NonCanonicalTableau[row, TotalVars];
+                    newTableau[row, col] = Tableau[row, TotalVars];
+                }
+            }
+
+        // As of now, assumming all values given have a sign restricition of +. May need to update
+        string[] newSignRestrictions = new string[newDecisionVars];
+        Array.Copy(SignRestrictions, 0, newSignRestrictions, 0, SignRestrictions.Length);
+        newSignRestrictions[newDecisionVars - 1] = "+";
+
+        // In order to use Math preliminary functions, a CanonicalTableau instance is required
+        CanonicalTableau tempTableau = new(newDecisionVars, ExcessVars, SlackVars, IsMaximization, newSignRestrictions, newTableau, newNonCanonicalTableau);
+        tempTableau.BasicVariableIndices = tempTableau.GetBasicVariableIndices();
+
+        // Perform math preliminaries matrix creation and create a instance from the result
+        MathPreliminariesResult result = tempTableau.ComputeMathPreliminaries(tempTableau.BasicVariableIndices);
+        double[,] resultTable = tempTableau.ConstructMathPrelimOptimalTableau(result);
+        CanonicalTableau resultInstance = new(newDecisionVars, ExcessVars, SlackVars, IsMaximization, newSignRestrictions, resultTable, newNonCanonicalTableau);
+
+        // The result may no longer be optimal
+        // TODO: Add check (negative values in Z - primal || negative values in RHS - dual)
+
+        return resultInstance;
     }
+    #endregion
 
+    #region Utility Functions
     private bool IsSlackVariable(int columnIndex)
     {
         // Since slack is always added after excess. Check index between
         return columnIndex >= DecisionVars + ExcessVars && columnIndex < TotalVars;
-    }
-
-    public double[] GetRow(int rowNo)
-    {
-        if (rowNo < 0 || rowNo >= Rows)
-            throw new ArgumentException($"Invalid row index provided: {rowNo}");
-
-        double[] row = new double[TotalVars + 1];
-        for (int col = 0; col < TotalVars + 1; col++)
-        {
-            row[col] = Tableau[rowNo, col];
-        }
-        return row;
-    }
-
-    public double[] GetColumn(int columnNo)
-    {
-        if (columnNo < 0 || columnNo >= TotalVars + 1)
-            throw new ArgumentException($"Invalid column index provided: {columnNo}");
-
-        double[] column = new double[Rows];
-        for (int row = 0; row < Rows; row++)
-        {
-            column[row] = Tableau[row, columnNo];
-        }
-        return column;
     }
 
     public bool IsBasicVariable(int columnNo)
@@ -421,7 +458,7 @@ public class CanonicalTableau
         return nonZeroCount == 1 && oneCount == 1;
     }
 
-    private List<int> GetBasicVariableIndices()
+    public List<int> GetBasicVariableIndices()
     {
         List<int> xBVIndices = [];
         for (int row = 1; row < Rows; row++)
@@ -437,6 +474,42 @@ public class CanonicalTableau
         return xBVIndices;
     }
 
+    public double[] GetRow(int rowNo, bool useNonCanonicalTableau = false)
+    {
+        double[,] usedTableau = useNonCanonicalTableau ? NonCanonicalTableau : Tableau;
+        int rowCount = usedTableau.GetLength(0);
+        int columnCount = usedTableau.GetLength(1);
+
+        if (rowNo < 0 || rowNo >= rowCount)
+            throw new ArgumentException($"Invalid row index provided: {rowNo}");
+
+        double[] row = new double[columnCount];
+        for (int col = 0; col < columnCount; col++)
+        {
+            row[col] = usedTableau[rowNo, col];
+        }
+        return row;
+    }
+
+    public double[] GetColumn(int columnNo, bool useNonCanonicalTableau = false)
+    {
+        double[,] usedTableau = useNonCanonicalTableau ? NonCanonicalTableau : Tableau;
+        int columnCount = usedTableau.GetLength(1);
+        int rowCount = usedTableau.GetLength(0);
+
+        if (columnNo < 0 || columnNo >= columnCount)
+            throw new ArgumentException($"Invalid column index provided: {columnNo}");
+
+        double[] column = new double[Rows];
+        for (int row = 0; row < rowCount; row++)
+        {
+            column[row] = Tableau[row, columnNo];
+        }
+        return column;
+    }
+    #endregion
+
+    #region Math Preliminaries
     private double[,] GetB(List<int> xBVIndices)
     {
         double[,] b = new double[xBVIndices.Count, xBVIndices.Count];
@@ -536,9 +609,8 @@ public class CanonicalTableau
         return optimalTableau;
     }
 
-    private MathPreliminariesResult ComputeMathPreliminaries()
+    private MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
     {
-        List<int> xBVIndices = GetBasicVariableIndices();
         if (xBVIndices.Count == 0)
             throw new InvalidOperationException("No basic variables found in table");
 
@@ -564,16 +636,5 @@ public class CanonicalTableau
             ZStar = zStar
         };
     }
-
-    public CanonicalTableau(int decisionVars, int excessVars, int slackVars, bool isMaximization, string[] signRestrictions, double[,] tableau, double[,] noncanonicaltableau)
-    {
-        DecisionVars = decisionVars;
-        ExcessVars = excessVars;
-        SlackVars = slackVars;
-        Rows = tableau.GetLength(0);
-        Tableau = tableau;
-        NonCanonicalTableau = noncanonicaltableau;
-        IsMaximization = isMaximization;
-        SignRestrictions = signRestrictions;
-    }
+    #endregion
 }
