@@ -24,29 +24,6 @@ public partial class SolverForm : Form
         solvers.Add("Knapsack Branch and Bound Algorithm", new SimplexSolver());
     }
 
-    private void btnFileUpload_Click(object sender, EventArgs e)
-    {
-        using OpenFileDialog openFileDialog = new();
-        openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-        if (openFileDialog.ShowDialog() == DialogResult.OK)
-        {
-            string path = openFileDialog.FileName;
-            txtFilePath.Text = path;
-
-            try
-            {
-                FileParser parser = new();
-                model = parser.Parse(path);
-
-                rtbOutput.Text = $"Model Type: {model.Type}\nObjective: {string.Join(", ", model.ObjectiveCoefficients)}\nConstraints: {model.Constraints.Count}\nSigns: {string.Join(" ", model.SignRestrictions)}";
-            }
-            catch (Exception ex)
-            {
-                _ = MessageBox.Show("Open Text File Error: " + ex.Message);
-            }
-        }
-    }
-
     private void rtbOutput_TextChanged(object sender, EventArgs e)
     {
 
@@ -126,5 +103,10 @@ public partial class SolverForm : Form
         {
             rtbOutput.Text = "Algorithm not implemented.";
         }
+    }
+
+    private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
     }
 }

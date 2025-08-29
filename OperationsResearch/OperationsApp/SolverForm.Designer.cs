@@ -17,9 +17,7 @@
 
         private void InitializeComponent()
         {
-            btnFileUpload = new Button();
             rtbOutput = new RichTextBox();
-            txtFilePath = new TextBox();
             btnSaveLocation = new Button();
             btnSimplex = new Button();
             btnRevisedSimplex = new Button();
@@ -28,40 +26,29 @@
             btnB_B_B = new Button();
             txtSaveLocation = new TextBox();
             lblOutputHeading = new Label();
+            tabControl1 = new TabControl();
+            tabSimplex = new TabPage();
+            tabBaB = new TabPage();
+            tabCuttingPlane = new TabPage();
+            tabControl1.SuspendLayout();
+            tabSimplex.SuspendLayout();
+            tabBaB.SuspendLayout();
+            tabCuttingPlane.SuspendLayout();
             SuspendLayout();
-            // 
-            // btnFileUpload
-            // 
-            btnFileUpload.Location = new Point(83, 72);
-            btnFileUpload.Margin = new Padding(4, 3, 4, 3);
-            btnFileUpload.Name = "btnFileUpload";
-            btnFileUpload.Size = new Size(194, 54);
-            btnFileUpload.TabIndex = 0;
-            btnFileUpload.Text = "Upload Textfile";
-            btnFileUpload.UseVisualStyleBackColor = true;
-            btnFileUpload.Click += btnFileUpload_Click;
             // 
             // rtbOutput
             // 
-            rtbOutput.Location = new Point(1017, 60);
+            rtbOutput.Location = new Point(1118, 66);
             rtbOutput.Margin = new Padding(4, 3, 4, 3);
             rtbOutput.Name = "rtbOutput";
-            rtbOutput.Size = new Size(894, 770);
+            rtbOutput.Size = new Size(584, 707);
             rtbOutput.TabIndex = 1;
             rtbOutput.Text = "";
             rtbOutput.TextChanged += rtbOutput_TextChanged;
             // 
-            // txtFilePath
-            // 
-            txtFilePath.Location = new Point(294, 88);
-            txtFilePath.Margin = new Padding(4, 3, 4, 3);
-            txtFilePath.Name = "txtFilePath";
-            txtFilePath.Size = new Size(326, 23);
-            txtFilePath.TabIndex = 2;
-            // 
             // btnSaveLocation
             // 
-            btnSaveLocation.Location = new Point(83, 133);
+            btnSaveLocation.Location = new Point(1118, 779);
             btnSaveLocation.Margin = new Padding(4, 3, 4, 3);
             btnSaveLocation.Name = "btnSaveLocation";
             btnSaveLocation.Size = new Size(194, 54);
@@ -72,7 +59,7 @@
             // 
             // btnSimplex
             // 
-            btnSimplex.Location = new Point(189, 573);
+            btnSimplex.Location = new Point(648, 677);
             btnSimplex.Margin = new Padding(4, 3, 4, 3);
             btnSimplex.Name = "btnSimplex";
             btnSimplex.Size = new Size(258, 96);
@@ -83,7 +70,7 @@
             // 
             // btnRevisedSimplex
             // 
-            btnRevisedSimplex.Location = new Point(189, 676);
+            btnRevisedSimplex.Location = new Point(382, 677);
             btnRevisedSimplex.Margin = new Padding(4, 3, 4, 3);
             btnRevisedSimplex.Name = "btnRevisedSimplex";
             btnRevisedSimplex.Size = new Size(258, 96);
@@ -94,7 +81,7 @@
             // 
             // btnB_B
             // 
-            btnB_B.Location = new Point(454, 573);
+            btnB_B.Location = new Point(20, 343);
             btnB_B.Margin = new Padding(4, 3, 4, 3);
             btnB_B.Name = "btnB_B";
             btnB_B.Size = new Size(258, 96);
@@ -105,7 +92,7 @@
             // 
             // btnCuttingPlane
             // 
-            btnCuttingPlane.Location = new Point(719, 573);
+            btnCuttingPlane.Location = new Point(24, 350);
             btnCuttingPlane.Margin = new Padding(4, 3, 4, 3);
             btnCuttingPlane.Name = "btnCuttingPlane";
             btnCuttingPlane.Size = new Size(258, 96);
@@ -116,7 +103,7 @@
             // 
             // btnB_B_B
             // 
-            btnB_B_B.Location = new Point(454, 676);
+            btnB_B_B.Location = new Point(286, 343);
             btnB_B_B.Margin = new Padding(4, 3, 4, 3);
             btnB_B_B.Name = "btnB_B_B";
             btnB_B_B.Size = new Size(258, 96);
@@ -127,52 +114,94 @@
             // 
             // txtSaveLocation
             // 
-            txtSaveLocation.Location = new Point(294, 149);
+            txtSaveLocation.Location = new Point(1320, 804);
             txtSaveLocation.Margin = new Padding(4, 3, 4, 3);
             txtSaveLocation.Name = "txtSaveLocation";
-            txtSaveLocation.Size = new Size(326, 23);
+            txtSaveLocation.Size = new Size(297, 29);
             txtSaveLocation.TabIndex = 10;
             // 
             // lblOutputHeading
             // 
             lblOutputHeading.AutoSize = true;
             lblOutputHeading.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline, GraphicsUnit.Point, 0);
-            lblOutputHeading.Location = new Point(1011, 23);
+            lblOutputHeading.Location = new Point(1118, 34);
             lblOutputHeading.Margin = new Padding(4, 0, 4, 0);
             lblOutputHeading.Name = "lblOutputHeading";
             lblOutputHeading.Size = new Size(537, 29);
             lblOutputHeading.TabIndex = 11;
             lblOutputHeading.Text = "Preview LP Form; Canonical Form; Final Answer:\r\n";
             // 
+            // tabControl1
+            // 
+            tabControl1.Controls.Add(tabSimplex);
+            tabControl1.Controls.Add(tabBaB);
+            tabControl1.Controls.Add(tabCuttingPlane);
+            tabControl1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            tabControl1.Location = new Point(1, 0);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(1728, 887);
+            tabControl1.TabIndex = 12;
+            tabControl1.SelectedIndexChanged += tabControl1_SelectedIndexChanged;
+            // 
+            // tabSimplex
+            // 
+            tabSimplex.BackColor = SystemColors.ActiveCaption;
+            tabSimplex.Controls.Add(btnSimplex);
+            tabSimplex.Controls.Add(lblOutputHeading);
+            tabSimplex.Controls.Add(btnRevisedSimplex);
+            tabSimplex.Controls.Add(rtbOutput);
+            tabSimplex.Controls.Add(txtSaveLocation);
+            tabSimplex.Controls.Add(btnSaveLocation);
+            tabSimplex.Location = new Point(4, 30);
+            tabSimplex.Name = "tabSimplex";
+            tabSimplex.Padding = new Padding(3);
+            tabSimplex.Size = new Size(1720, 853);
+            tabSimplex.TabIndex = 0;
+            tabSimplex.Text = "Simplex Section";
+            // 
+            // tabBaB
+            // 
+            tabBaB.BackColor = SystemColors.ActiveCaption;
+            tabBaB.Controls.Add(btnB_B);
+            tabBaB.Controls.Add(btnB_B_B);
+            tabBaB.Location = new Point(4, 30);
+            tabBaB.Name = "tabBaB";
+            tabBaB.Padding = new Padding(3);
+            tabBaB.Size = new Size(1709, 851);
+            tabBaB.TabIndex = 1;
+            tabBaB.Text = "Branch And Bound Section";
+            // 
+            // tabCuttingPlane
+            // 
+            tabCuttingPlane.BackColor = SystemColors.ActiveCaption;
+            tabCuttingPlane.Controls.Add(btnCuttingPlane);
+            tabCuttingPlane.Location = new Point(4, 30);
+            tabCuttingPlane.Name = "tabCuttingPlane";
+            tabCuttingPlane.Size = new Size(1709, 851);
+            tabCuttingPlane.TabIndex = 2;
+            tabCuttingPlane.Text = "Cutting Plane Section";
+            // 
             // SolverForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1924, 888);
-            Controls.Add(lblOutputHeading);
-            Controls.Add(txtSaveLocation);
-            Controls.Add(btnB_B_B);
-            Controls.Add(btnCuttingPlane);
-            Controls.Add(btnB_B);
-            Controls.Add(btnRevisedSimplex);
-            Controls.Add(btnSimplex);
-            Controls.Add(btnSaveLocation);
-            Controls.Add(txtFilePath);
-            Controls.Add(rtbOutput);
-            Controls.Add(btnFileUpload);
+            ClientSize = new Size(1730, 888);
+            Controls.Add(tabControl1);
             Margin = new Padding(4, 3, 4, 3);
             Name = "SolverForm";
             Text = "SolverForm";
             WindowState = FormWindowState.Maximized;
+            tabControl1.ResumeLayout(false);
+            tabSimplex.ResumeLayout(false);
+            tabSimplex.PerformLayout();
+            tabBaB.ResumeLayout(false);
+            tabCuttingPlane.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-
-        private System.Windows.Forms.Button btnFileUpload;
         private System.Windows.Forms.RichTextBox rtbOutput;
-        private System.Windows.Forms.TextBox txtFilePath;
         private System.Windows.Forms.Button btnSaveLocation;
         private System.Windows.Forms.Button btnSimplex;
         private System.Windows.Forms.Button btnRevisedSimplex;
@@ -181,5 +210,9 @@
         private System.Windows.Forms.Button btnB_B_B;
         private System.Windows.Forms.TextBox txtSaveLocation;
         private System.Windows.Forms.Label lblOutputHeading;
+        private TabControl tabControl1;
+        private TabPage tabSimplex;
+        private TabPage tabBaB;
+        private TabPage tabCuttingPlane;
     }
 }
