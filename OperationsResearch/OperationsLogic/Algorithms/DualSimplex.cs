@@ -6,7 +6,6 @@ namespace OperationsLogic.Algorithms;
 
 public class DualSimplex
 {
-    public static (string, CanonicalTableau tableau) Solve(CanonicalTableau tableau)
     public static (string, CanonicalTableau?) Solve(CanonicalTableau tableau, int iteration = 0)
     {
         StringBuilder sb = new();

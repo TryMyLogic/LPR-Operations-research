@@ -151,6 +151,7 @@ public class CuttingPlane
             slackVars: tableau.SlackVars + 1,
             isMaximization: tableau.IsMaximization,
             signRestrictions: newSignRestrictions,
+            noncanonicaltableau: tableau.NonCanonicalTableau,
             tableau: newTableau
         );
     }
