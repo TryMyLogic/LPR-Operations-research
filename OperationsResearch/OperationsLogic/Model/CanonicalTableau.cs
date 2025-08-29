@@ -3,17 +3,19 @@
 namespace OperationsLogic.Model;
 public class CanonicalTableau
 {
-    public int Rows { get; }
-    public int DecisionVars { get; }
-    public int ExcessVars { get; }
-    public int SlackVars { get; }
+    public int Rows { get; set; }
+    public int DecisionVars { get; set; }
+    public int ExcessVars { get; set; }
+    public int SlackVars { get; set; }
     public int TotalVars => DecisionVars + ExcessVars + SlackVars; // Column count
     public double[,] Tableau { get; private set; } // Matrix style table
-    public bool IsMaximization { get; }
+    public bool IsMaximization { get; set; }
     public string[] SignRestrictions { get; }  // specify +, -, urs, int or bin for each decision var in inputLines
 
     private static readonly string[] ValidOperatorsAndTypes = ["+", "-", "urs", "int", "bin"];
     private static readonly string[] ValidConstraintOperators = ["<=", ">=", "="];
+
+    public CanonicalTableau() { }
 
     public CanonicalTableau(string[] inputLines)
     {
