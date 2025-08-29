@@ -6,6 +6,7 @@ namespace OperationsLogic.Algorithms;
 
 public class DualSimplex
 {
+    public static (string, CanonicalTableau tableau) Solve(CanonicalTableau tableau)
     public static (string, CanonicalTableau?) Solve(CanonicalTableau tableau, int iteration = 0)
     {
         StringBuilder sb = new();
@@ -27,6 +28,8 @@ public class DualSimplex
 
             if (iteration == initialIteration)
             {
+                _ = sb.AppendLine("Initial Tableau:");
+                _ = sb.AppendLine(tableau.DisplayTableau(thetas));
                 _ = sb.AppendLine("Initial Dual Simplex Tableau:");
                 _ = sb.AppendLine($"Iteration {iteration}");
                 _ = sb.AppendLine(tableau.DisplayTableau(thetas));
