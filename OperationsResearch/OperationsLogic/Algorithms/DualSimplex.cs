@@ -56,7 +56,7 @@ public class DualSimplex
     {
         double mostNegative = 0;
         int pivotRow = -1; // Previously called negativeIndex
-        for (int row = 1; row < tableau.Rows; row++) // Starts at 1 since you dont check Z row RHS (always 0)
+        for (int row = 1; row < tableau.Rows; row++) // Starts at 1 since you don't check Z row RHS (always 0)
         {
             double rhsValue = tableau.Tableau[row, tableau.TotalVars];
             if (rhsValue < mostNegative)

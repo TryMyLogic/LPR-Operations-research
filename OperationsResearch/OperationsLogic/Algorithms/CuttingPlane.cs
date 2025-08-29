@@ -28,15 +28,15 @@ public class CuttingPlane
             }
 
             string msg = $"Selected cutting row: {cutRowIndex}, RHS: {tableau.Tableau[cutRowIndex, tableau.TotalVars]}, Fractional part: {Math.Abs(tableau.Tableau[cutRowIndex, tableau.TotalVars] - Math.Floor(tableau.Tableau[cutRowIndex, tableau.TotalVars]))}";
-            sb.AppendLine(msg);
-            sb.AppendLine();
+            _ = sb.AppendLine(msg);
+            _ = sb.AppendLine();
 
             _ = sb.AppendLine($"Iteration {iteration}");
-            double[] newConstraint = DetermineCuttingConstraint(tableau, cutRowIndex, 0);
+            double[] newConstraint = DetermineCuttingConstraint(tableau, cutRowIndex);
             tableau = AddCutToTableau(tableau, newConstraint);
             _ = sb.AppendLine(tableau.DisplayTableau());
 
-            iteration++; // Count Dual Simplex as seperate Iteration
+            iteration++; // Count Dual Simplex as separate Iteration
             (string output, CanonicalTableau? iter) = DualSimplex.Solve(tableau, iteration);
             tableau = iter ?? throw new InvalidOperationException("Return table should not be null!");
 
@@ -60,8 +60,7 @@ public class CuttingPlane
                 continue;
             }
 
-            double[] column = GetColumn(tableau.Tableau, col, tableau.Rows);
-            if (IsBasicVariable(column))
+            if (tableau.IsBasicVariable(col))
             {
                 // Determine row where basic variable has 1
                 for (int row = 1; row < tableau.Rows; row++)
@@ -91,7 +90,7 @@ public class CuttingPlane
         return cutRowIndex;
     }
 
-    public static double[] DetermineCuttingConstraint(CanonicalTableau tableau, int cutRowIndex, int basicVarIndex)
+    public static double[] DetermineCuttingConstraint(CanonicalTableau tableau, int cutRowIndex)
     {
         // New double is not zero indexed hence - +1
         double[] newConstraint = new double[tableau.TotalVars + 2]; // +1 for new slack/excess column.
@@ -155,35 +154,6 @@ public class CuttingPlane
             tableau: newTableau
         );
     }
-
-    private static double[] GetColumn(double[,] tableau, int columnNo, int rowCount)
-    {
-        double[] column = new double[rowCount];
-        for (int i = 0; i < rowCount; i++)
-        {
-            column[i] = tableau[i, columnNo];
-        }
-        return column;
-    }
-
-    private static bool IsBasicVariable(double[] column)
-    {
-        int oneCount = 0;
-        int nonZeroCount = 0;
-        foreach (double value in column)
-        {
-            if (value != 0)
-            {
-                nonZeroCount++;
-            }
-            if (value == 1)
-            {
-                oneCount++;
-            }
-        }
-        return nonZeroCount == 1 && oneCount == 1;
-    }
-
 }
 
 
