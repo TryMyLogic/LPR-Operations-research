@@ -98,7 +98,15 @@ public partial class SolverForm : Form
             try
             {
                 solver.Solve(model, out outputText);
-                rtbOutput.Text = outputText;
+                switch (algorithm)
+                {
+                    case "Knapsack Branch and Bound Algorithm":
+                        rtbBranchAndBound.Text = outputText;
+                        break;
+                    default:
+                        rtbOutput.Text = outputText;
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -205,5 +213,10 @@ public partial class SolverForm : Form
                 _ = MessageBox.Show("Error saving file: " + ex.Message, "Error");
             }
         }
+    }
+
+    private void btnSensitivity_Click(object sender, EventArgs e)
+    {
+
     }
 }
