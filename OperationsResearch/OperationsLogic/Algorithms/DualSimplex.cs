@@ -6,11 +6,11 @@ namespace OperationsLogic.Algorithms;
 
 public class DualSimplex
 {
-    public static (string, CanonicalTableau tableau) Solve(CanonicalTableau tableau)
+    public static (string, CanonicalTableau?) Solve(CanonicalTableau tableau, int iteration = 0)
     {
         StringBuilder sb = new();
 
-        int iteration = 0;
+        int initialIteration = iteration;
         while (true)
         {
             int pivotRowIndex = FindMostNegativeRHSIndex(tableau);
@@ -25,9 +25,12 @@ public class DualSimplex
 
             (int pivotColumn, double[] thetas) = DeterminePivotColumnAndThetas(tableau, pivotRowIndex);
 
-            if (iteration == 0)
+            if (iteration == initialIteration)
             {
                 _ = sb.AppendLine("Initial Tableau:");
+                _ = sb.AppendLine(tableau.DisplayTableau(thetas));
+                _ = sb.AppendLine("Initial Dual Simplex Tableau:");
+                _ = sb.AppendLine($"Iteration {iteration}");
                 _ = sb.AppendLine(tableau.DisplayTableau(thetas));
             }
             else
@@ -53,7 +56,7 @@ public class DualSimplex
     {
         double mostNegative = 0;
         int pivotRow = -1; // Previously called negativeIndex
-        for (int row = 1; row < tableau.Rows; row++) // Starts at 1 since you dont check Z row RHS (always 0)
+        for (int row = 1; row < tableau.Rows; row++) // Starts at 1 since you don't check Z row RHS (always 0)
         {
             double rhsValue = tableau.Tableau[row, tableau.TotalVars];
             if (rhsValue < mostNegative)
