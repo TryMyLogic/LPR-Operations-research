@@ -13,6 +13,7 @@ public class CanonicalTableau
     public int SlackVars { get; set; }
     public int TotalVars => DecisionVars + ExcessVars + SlackVars; // Column count
     public double[,] Tableau { get; private set; } // Matrix style table
+    public double[,] NonCanonicalTableau { get; private set; } // Required for functions such as add constraint that perform math preliminaries and stored seperatly in-case Tableau is optimized and overwritten
     public bool IsMaximization { get; set; }
     public string[] SignRestrictions { get; }  // specify +, -, urs, int or bin for each decision var in inputLines
 
@@ -179,7 +180,7 @@ public class CanonicalTableau
         IsMaximization = isMaximization;
         SignRestrictions = signRestrictions;
     }
-    #endregion
+   
 
     #region Tableau manipulation
     public string DisplayTableau(double[]? thetas = null, bool displayNonCanonical = false)

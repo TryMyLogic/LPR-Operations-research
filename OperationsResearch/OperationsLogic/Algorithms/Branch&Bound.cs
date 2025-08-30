@@ -19,6 +19,7 @@ interface IBranchAndBound
 }
 public class Branch_Bound : IBranchAndBound
 {
+    public List<CanonicalTableau> CompletedBranches { get; } = new();
 
     public int B_BDetermineBranchRowIndex(double[] rhsValues)
     {
@@ -199,46 +200,94 @@ public class Branch_Bound : IBranchAndBound
 
     public void B_BProcess(CanonicalTableau tableau)
     {
-        bool solvedCeiling = false;
-        bool solvedFloor = false;
-        double[] rhsValues = new double[tableau.Rows+1];
-        CanonicalTableau tableaubranchedCeiling = B_BAddNewConstraint(tableau, ">=");
-        CanonicalTableau tableaubranchedFloor = B_BAddNewConstraint(tableau, "<=");
-        do
-        {
-            if (!solvedCeiling)
-            {
-                for (int i = 0; i < tableaubranchedCeiling.Rows; i++)
-                {
-                    rhsValues[i] = tableaubranchedCeiling.Tableau[i, tableaubranchedCeiling.TotalVars];
-                }
-                if (B_BDetermineBranchRowIndex(rhsValues) == -1)
-                {
-                    solvedCeiling = true;
-                }
-                else
-                {
-                    DualSimplex.Solve(tableaubranchedCeiling);
-                }
-            }
-            if (!solvedFloor)
-            {
-                for (int i = 0; i < tableaubranchedFloor.Rows; i++)
-                {
-                    rhsValues[i] = tableaubranchedFloor.Tableau[i, tableaubranchedFloor.TotalVars];
-                }
-                if (B_BDetermineBranchRowIndex(rhsValues) == -1)
-                {
-                    solvedFloor = true;
-                }
-                else
-                {
-                    DualSimplex.Solve(tableaubranchedFloor);
+        // Solve the tableau with dual simplex
+        var (log, solvedTableau) = DualSimplex.Solve(tableau);
 
+        // Extract RHS values
+        double[] rhsValues = new double[solvedTableau.Rows];
+        for (int i = 0; i < solvedTableau.Rows; i++)
+        {
+            rhsValues[i] = solvedTableau.Tableau[i, solvedTableau.TotalVars];
+        }
+
+        // Check if this tableau still has a fractional value
+        int branchRowIndex = B_BDetermineBranchRowIndex(rhsValues);
+
+
+        //add displaytableau here if you want to see iterations
+        
+
+
+
+        if (branchRowIndex == -1)
+        {
+            //  node feasible or infeasible/optimal → save branch
+            CompletedBranches.Add(solvedTableau);
+            return;
+        }
+        //floor 
+        try
+        {
+            CanonicalTableau floorBranch = B_BAddNewConstraint(solvedTableau, "<=");
+            B_BProcess(floorBranch); // recurse
+        }
+        catch
+        {
+            // infeasible → save branch
+            CompletedBranches.Add(solvedTableau);
+        }
+
+       //ceiling
+        try
+        {
+            CanonicalTableau ceilBranch = B_BAddNewConstraint(solvedTableau, ">=");
+            B_BProcess(ceilBranch); // recurse
+        }
+        catch
+        {
+            // infeasible → save branch
+            CompletedBranches.Add(solvedTableau);
+        }
+    }
+
+    public void BestBranch(out string output, out CanonicalTableau bestTableau)
+    {
+        StringBuilder sb = new();
+        double bestZ = double.NegativeInfinity;
+        CanonicalTableau? best = null;
+        foreach (var branch in CompletedBranches)
+        {
+            double zValue = branch.Tableau[0, branch.TotalVars];
+            if (branch.IsMaximization)
+            {
+                if (zValue > bestZ)
+                {
+                    bestZ = zValue;
+                    best = branch;
                 }
             }
-        } while (!solvedCeiling && !solvedFloor);
-        
+            else
+            {
+                if (zValue < bestZ || bestZ == double.NegativeInfinity)
+                {
+                    bestZ = zValue;
+                    best = branch;
+                }
+            }
+        }
+        if (best != null)
+        {
+            sb.AppendLine("=== Best Branch ===");
+            sb.AppendLine(best.DisplayTableau());
+            sb.AppendLine($"Optimal Z: {Math.Round(bestZ, 3)}");
+        }
+        else
+        {
+            sb.AppendLine("No feasible branches found.");
+        }
+        output = sb.ToString();
+        bestTableau = best ?? new CanonicalTableau();
     }
+
 
 }
