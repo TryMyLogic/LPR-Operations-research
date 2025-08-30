@@ -200,17 +200,14 @@ public class Branch_Bound : IBranchAndBound
 
     public void B_BProcess(CanonicalTableau tableau)
     {
-        // Solve the tableau with dual simplex
         var (log, solvedTableau) = DualSimplex.Solve(tableau);
 
-        // Extract RHS values
         double[] rhsValues = new double[solvedTableau.Rows];
         for (int i = 0; i < solvedTableau.Rows; i++)
         {
             rhsValues[i] = solvedTableau.Tableau[i, solvedTableau.TotalVars];
         }
 
-        // Check if this tableau still has a fractional value
         int branchRowIndex = B_BDetermineBranchRowIndex(rhsValues);
 
 
@@ -221,7 +218,6 @@ public class Branch_Bound : IBranchAndBound
 
         if (branchRowIndex == -1)
         {
-            //  node feasible or infeasible/optimal → save branch
             CompletedBranches.Add(solvedTableau);
             return;
         }
@@ -233,7 +229,6 @@ public class Branch_Bound : IBranchAndBound
         }
         catch
         {
-            // infeasible → save branch
             CompletedBranches.Add(solvedTableau);
         }
 
@@ -245,7 +240,6 @@ public class Branch_Bound : IBranchAndBound
         }
         catch
         {
-            // infeasible → save branch
             CompletedBranches.Add(solvedTableau);
         }
     }
