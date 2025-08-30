@@ -9,10 +9,13 @@ public class RevisedSimplexSolver : ISolver
     public void Solve(LinearModel model, out string output)
     {
         StringBuilder sb = new();
-        _ = sb.AppendLine("Revised Primal Simplex Iterations:");
+        sb.AppendLine("==============================");
+        sb.AppendLine("   Revised Primal Simplex");
+        sb.AppendLine("==============================");
 
         bool isMax = model.Type == "max";
         List<double> objCoeffs = [.. model.ObjectiveCoefficients];
+
         if (!isMax)
             for (int i = 0; i < objCoeffs.Count; i++)
                 objCoeffs[i] = -objCoeffs[i];
@@ -32,8 +35,9 @@ public class RevisedSimplexSolver : ISolver
             A[i, n + i] = 1;
             b[i] = model.Constraints[i].RHS;
         }
+
         for (int j = 0; j < n; j++)
-            c[j] = isMax ? objCoeffs[j] : -objCoeffs[j];
+            c[j] = objCoeffs[j];
 
         int[] basis = new int[m];
         for (int i = 0; i < m; i++) basis[i] = n + i;
@@ -43,83 +47,107 @@ public class RevisedSimplexSolver : ISolver
 
         double[] xB = MultiplyMatrixVector(BInv, b);
 
+        sb.AppendLine("\nCanonical Form:");
+        sb.AppendLine("------------------------------");
+        PrintMatrix(A, b, c, sb, n, m, totalVars);
+        sb.AppendLine();
+
         int iter = 0;
         while (true)
         {
             iter++;
-            _ = sb.AppendLine($"Iteration {iter}:");
+            sb.AppendLine($"\nIteration {iter}");
+            sb.AppendLine("------------------------------");
 
             double[] cB = GetCBasis(c, basis);
-            double[] pi = MultiplyVectorMatrix(cB, BInv); // Dual variables
+            double[] pi = MultiplyVectorMatrix(cB, BInv);
 
-            double maxReduced = 0;
+            sb.AppendLine($"Basis Variables: {string.Join(", ", basis.Select(bi => $"x{bi + 1}"))}");
+            sb.AppendLine($"xB = [ {string.Join(", ", xB.Select(v => v.ToString("F3")))} ]");
+            sb.AppendLine($"Dual Variables (pi) = [ {string.Join(", ", pi.Select(v => v.ToString("F3")))} ]");
+
+            double bestReduced = 0;
             int entering = -1;
             for (int j = 0; j < totalVars; j++)
             {
                 if (Array.IndexOf(basis, j) != -1) continue;
                 double[] Aj = GetColumn(A, j);
                 double reduced = c[j] - Dot(pi, Aj);
-                if (reduced < maxReduced)
+                sb.AppendLine($"Reduced cost for x{j + 1}: {reduced:F3}");
+                if (reduced > bestReduced + 1e-9)
                 {
-                    maxReduced = reduced;
+                    bestReduced = reduced;
                     entering = j;
                 }
             }
+
             if (entering == -1)
             {
-                _ = sb.AppendLine("Optimal reached.");
+                sb.AppendLine("--> Optimal solution reached.");
                 break;
             }
 
-            _ = sb.AppendLine($"Reduced Costs: c[{entering}] = {c[entering]}, pi . A[{entering}] = {Dot(pi, GetColumn(A, entering))}, Reduced = {maxReduced}");
+            sb.AppendLine($"\n--> Entering variable: x{entering + 1}");
+
             double[] AEnter = GetColumn(A, entering);
-            double[] col = MultiplyMatrixVector(BInv, AEnter);
+            double[] d = MultiplyMatrixVector(BInv, AEnter);
 
             double minRatio = double.PositiveInfinity;
             int leaving = -1;
             for (int i = 0; i < m; i++)
-                if (col[i] > 0)
+            {
+                if (d[i] > 1e-9)
                 {
-                    double ratio = xB[i] / col[i];
+                    double ratio = xB[i] / d[i];
+                    sb.AppendLine($"Ratio test: {xB[i]:F3} / {d[i]:F3} = {ratio:F3}");
                     if (ratio < minRatio)
                     {
                         minRatio = ratio;
                         leaving = i;
                     }
                 }
+            }
+
             if (leaving == -1)
             {
-                _ = sb.AppendLine("Problem is unbounded.");
+                sb.AppendLine("--> Problem is unbounded.");
                 output = sb.ToString();
                 return;
             }
 
-            double[,] eta = new double[m, m];
-            for (int i = 0; i < m; i++) eta[i, i] = 1;
-            double pivot = col[leaving];
-            for (int i = 0; i < m; i++)
-                eta[i, leaving] = i == leaving ? 1 / pivot : -col[i] / pivot;
+            sb.AppendLine($"--> Leaving variable: x{basis[leaving] + 1}");
 
-            BInv = MultiplyMatrices(eta, BInv);
-            xB = MultiplyMatrixVector(eta, xB);
+            double[] newxB = new double[m];
+            for (int i = 0; i < m; i++)
+                newxB[i] = xB[i] - d[i] * minRatio;
+            newxB[leaving] = minRatio;
+            xB = newxB;
+
             basis[leaving] = entering;
 
-            _ = sb.AppendLine("B^{-1} Update:");
+            double[,] B = new double[m, m];
+            for (int i = 0; i < m; i++)
+                for (int j = 0; j < m; j++)
+                    B[i, j] = A[i, basis[j]];
+            BInv = InvertMatrix(B);
+
+            sb.AppendLine("Updated Basis Inverse:");
             for (int i = 0; i < m; i++)
             {
                 for (int j = 0; j < m; j++)
-                    _ = sb.Append($"{BInv[i, j]:F3}\t");
-                _ = sb.AppendLine();
+                    sb.Append($"{BInv[i, j]:F3}\t");
+                sb.AppendLine();
             }
+            sb.AppendLine();
         }
 
         double objValue = Dot(GetCBasis(c, basis), xB);
-        _ = sb.AppendLine($"Optimal Objective Value: {objValue:F3}");
-        double[] solution = new double[n];
-        for (int i = 0; i < m; i++)
-            if (basis[i] < n) solution[basis[i]] = xB[i];
+        sb.AppendLine("==============================");
+        sb.AppendLine($"Optimal Objective Value: {objValue:F3}");
+        sb.AppendLine("Solution:");
         for (int j = 0; j < n; j++)
-            _ = sb.AppendLine($"x{j + 1} = {solution[j]:F3}");
+            sb.AppendLine($"x{j + 1} = {xB.ElementAtOrDefault(Array.IndexOf(basis, j)):F3}");
+        sb.AppendLine("==============================");
 
         output = sb.ToString();
     }
@@ -150,7 +178,7 @@ public class RevisedSimplexSolver : ISolver
         double[] res = new double[mat.GetLength(1)];
         for (int j = 0; j < mat.GetLength(1); j++)
             for (int i = 0; i < vec.Length; i++)
-                res[j] += vec[i] * mat[i, j]; // Fixed row-major order
+                res[j] += vec[i] * mat[i, j];
         return res;
     }
 
@@ -163,13 +191,51 @@ public class RevisedSimplexSolver : ISolver
         return res;
     }
 
-    private double[,] MultiplyMatrices(double[,] a, double[,] b)
+    private double[,] InvertMatrix(double[,] mat)
     {
-        double[,] res = new double[a.GetLength(0), b.GetLength(1)];
-        for (int i = 0; i < a.GetLength(0); i++)
-            for (int j = 0; j < b.GetLength(1); j++)
-                for (int k = 0; k < a.GetLength(1); k++)
-                    res[i, j] += a[i, k] * b[k, j];
+        int n = mat.GetLength(0);
+        double[,] res = new double[n, n];
+        double[,] aug = new double[n, 2 * n];
+
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++) aug[i, j] = mat[i, j];
+            aug[i, n + i] = 1;
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            double diag = aug[i, i];
+            for (int j = 0; j < 2 * n; j++) aug[i, j] /= diag;
+            for (int k = 0; k < n; k++)
+            {
+                if (k == i) continue;
+                double factor = aug[k, i];
+                for (int j = 0; j < 2 * n; j++) aug[k, j] -= factor * aug[i, j];
+            }
+        }
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                res[i, j] = aug[i, j + n];
+
         return res;
+    }
+
+    private void PrintMatrix(double[,] A, double[] b, double[] c, StringBuilder sb, int n, int m, int totalVars)
+    {
+        sb.AppendLine("Matrix A and RHS b:");
+        for (int i = 0; i < m; i++)
+        {
+            sb.Append("| ");
+            for (int j = 0; j < totalVars; j++)
+                sb.Append($"{A[i, j]:F3}\t");
+            sb.AppendLine($"| {b[i]:F3}");
+        }
+        sb.AppendLine("Objective Row c:");
+        sb.Append("| ");
+        for (int j = 0; j < totalVars; j++)
+            sb.Append($"{c[j]:F3}\t");
+        sb.AppendLine("|");
     }
 }
