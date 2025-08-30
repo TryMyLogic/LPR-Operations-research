@@ -45,10 +45,19 @@
             button5 = new Button();
             button2 = new Button();
             tabSenAnalysis = new TabPage();
+            tabNLP = new TabPage();
+            button8 = new Button();
+            button9 = new Button();
+            btnSolveNLP = new Button();
+            btnSaveNLPsolution = new Button();
+            rtbPreviewNLP = new RichTextBox();
+            txtDisplayFileLocationNLP = new TextBox();
+            btnLoadTextfileNLP = new Button();
             tabControl1.SuspendLayout();
             tabSimplex.SuspendLayout();
             tabBaB.SuspendLayout();
             tabCuttingPlane.SuspendLayout();
+            tabNLP.SuspendLayout();
             SuspendLayout();
             // 
             // rtbOutput
@@ -152,6 +161,7 @@
             tabControl1.Controls.Add(tabBaB);
             tabControl1.Controls.Add(tabCuttingPlane);
             tabControl1.Controls.Add(tabSenAnalysis);
+            tabControl1.Controls.Add(tabNLP);
             tabControl1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
             tabControl1.Location = new Point(1, 0);
             tabControl1.Name = "tabControl1";
@@ -362,12 +372,96 @@
             tabSenAnalysis.TabIndex = 3;
             tabSenAnalysis.Text = "Sensitivity Analysis";
             // 
+            // tabNLP
+            // 
+            tabNLP.BackColor = SystemColors.ActiveCaption;
+            tabNLP.Controls.Add(button8);
+            tabNLP.Controls.Add(button9);
+            tabNLP.Controls.Add(btnSolveNLP);
+            tabNLP.Controls.Add(btnSaveNLPsolution);
+            tabNLP.Controls.Add(rtbPreviewNLP);
+            tabNLP.Controls.Add(txtDisplayFileLocationNLP);
+            tabNLP.Controls.Add(btnLoadTextfileNLP);
+            tabNLP.Location = new Point(4, 30);
+            tabNLP.Name = "tabNLP";
+            tabNLP.Size = new Size(1720, 853);
+            tabNLP.TabIndex = 4;
+            tabNLP.Text = "Non Linear Solver";
+            // 
+            // button8
+            // 
+            button8.Location = new Point(1440, 802);
+            button8.Name = "button8";
+            button8.Size = new Size(135, 48);
+            button8.TabIndex = 17;
+            button8.Text = "Back";
+            button8.UseVisualStyleBackColor = true;
+            button8.Click += button8_Click;
+            // 
+            // button9
+            // 
+            button9.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button9.Location = new Point(1581, 802);
+            button9.Name = "button9";
+            button9.Size = new Size(135, 48);
+            button9.TabIndex = 16;
+            button9.Text = "Exit";
+            button9.UseVisualStyleBackColor = true;
+            button9.Click += button9_Click;
+            // 
+            // btnSolveNLP
+            // 
+            btnSolveNLP.Location = new Point(510, 775);
+            btnSolveNLP.Name = "btnSolveNLP";
+            btnSolveNLP.Size = new Size(166, 49);
+            btnSolveNLP.TabIndex = 4;
+            btnSolveNLP.Text = "Solve";
+            btnSolveNLP.UseVisualStyleBackColor = true;
+            btnSolveNLP.Click += btnSolveNLP_Click;
+            // 
+            // btnSaveNLPsolution
+            // 
+            btnSaveNLPsolution.Location = new Point(1128, 775);
+            btnSaveNLPsolution.Name = "btnSaveNLPsolution";
+            btnSaveNLPsolution.Size = new Size(166, 49);
+            btnSaveNLPsolution.TabIndex = 3;
+            btnSaveNLPsolution.Text = "Save Solution";
+            btnSaveNLPsolution.UseVisualStyleBackColor = true;
+            btnSaveNLPsolution.Click += btnSaveNLPsolution_Click;
+            // 
+            // rtbPreviewNLP
+            // 
+            rtbPreviewNLP.Location = new Point(510, 22);
+            rtbPreviewNLP.Name = "rtbPreviewNLP";
+            rtbPreviewNLP.Size = new Size(784, 747);
+            rtbPreviewNLP.TabIndex = 2;
+            rtbPreviewNLP.Text = "";
+            rtbPreviewNLP.TextChanged += rtbPreviewNLP_TextChanged;
+            // 
+            // txtDisplayFileLocationNLP
+            // 
+            txtDisplayFileLocationNLP.Location = new Point(82, 215);
+            txtDisplayFileLocationNLP.Name = "txtDisplayFileLocationNLP";
+            txtDisplayFileLocationNLP.Size = new Size(281, 29);
+            txtDisplayFileLocationNLP.TabIndex = 1;
+            txtDisplayFileLocationNLP.TextChanged += txtDisplayFileLocationNLP_TextChanged;
+            // 
+            // btnLoadTextfileNLP
+            // 
+            btnLoadTextfileNLP.Location = new Point(82, 160);
+            btnLoadTextfileNLP.Name = "btnLoadTextfileNLP";
+            btnLoadTextfileNLP.Size = new Size(166, 49);
+            btnLoadTextfileNLP.TabIndex = 0;
+            btnLoadTextfileNLP.Text = "Load Textfile";
+            btnLoadTextfileNLP.UseVisualStyleBackColor = true;
+            btnLoadTextfileNLP.Click += btnLoadTextfileNLP_Click;
+            // 
             // SolverForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            ClientSize = new Size(1730, 888);
+            ClientSize = new Size(1733, 891);
             Controls.Add(tabControl1);
             Margin = new Padding(4, 3, 4, 3);
             Name = "SolverForm";
@@ -381,6 +475,8 @@
             tabBaB.PerformLayout();
             tabCuttingPlane.ResumeLayout(false);
             tabCuttingPlane.PerformLayout();
+            tabNLP.ResumeLayout(false);
+            tabNLP.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -413,5 +509,13 @@
         private TextBox textBox2;
         private Button button7;
         private TabPage tabSenAnalysis;
+        private TabPage tabNLP;
+        private TextBox txtDisplayFileLocationNLP;
+        private Button btnLoadTextfileNLP;
+        private Button btnSaveNLPsolution;
+        private RichTextBox rtbPreviewNLP;
+        private Button btnSolveNLP;
+        private Button button8;
+        private Button button9;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using OperationsApp;
 
 using OperationsLogic.Algorithms;
+using OperationsLogic.Bonus_NLP;
 using OperationsLogic.Misc;
 
 namespace LPR381_Windows_Project;
@@ -11,12 +12,18 @@ public partial class SolverForm : Form
     private string outputText = string.Empty;
     private readonly Dictionary<string, ISolver> solvers = [];
 
+    private NonLinearProblem _nlpProblem;
+    private NonLinearSolverManager _nlpSolverManager;
+    private string _outputText = string.Empty;
+
     public SolverForm(LinearModel model1)
     {
         InitializeComponent();
         InitializeSolvers();
         this.StartPosition = FormStartPosition.CenterScreen;
         this.WindowState = FormWindowState.Normal;
+
+        _nlpSolverManager = new NonLinearSolverManager();
 
         model = model1;
     }
@@ -205,5 +212,134 @@ public partial class SolverForm : Form
                 _ = MessageBox.Show("Error saving file: " + ex.Message, "Error");
             }
         }
+    }
+
+    private void btnLoadTextfileNLP_Click(object sender, EventArgs e)
+    {
+        using OpenFileDialog openFileDialog = new()
+        {
+            Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*"
+        };
+
+        if (openFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                NLPFileParser parser = new();
+                _nlpProblem = parser.Parse(openFileDialog.FileName);
+
+                rtbPreviewNLP.Text =
+                    $"Function loaded successfully:\r\n" +
+                    $"Objective: {_nlpProblem.ObjectiveText}\r\n" +
+                    $"Gradients:\r\n{string.Join(Environment.NewLine, _nlpProblem.GradientText)}";
+
+                txtDisplayFileLocationNLP.Text = openFileDialog.FileName;
+
+                _nlpSolverManager.SetProblem(_nlpProblem);
+
+                btnSolveNLP.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Open Text File Error: " + ex.Message);
+            }
+        }
+    }
+
+    private void txtDisplayFileLocationNLP_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void rtbPreviewNLP_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void btnSaveNLPsolution_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(_outputText))
+        {
+            MessageBox.Show("No solution to save. Solve the function first.");
+            return;
+        }
+
+        using SaveFileDialog saveFileDialog = new()
+        {
+            Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*"
+        };
+
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                System.IO.File.WriteAllText(saveFileDialog.FileName, _outputText);
+                txtSaveLocation.Text = saveFileDialog.FileName;
+                MessageBox.Show("Output saved successfully.", "Success");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving file: " + ex.Message, "Error");
+            }
+        }
+    }
+
+    private void btnSolveNLP_Click(object sender, EventArgs e)
+    {
+        if (_nlpProblem == null)
+        {
+            MessageBox.Show("Please load a function file first.");
+            return;
+        }
+
+        try
+        {
+            int numVars = CountVariables(_nlpProblem.ObjectiveText);
+            double[] initialGuess = new double[numVars];
+
+            // Assign non-zero initial guess for multi-D problems
+            if (numVars > 1)
+            {
+                for (int i = 0; i < numVars; i++)
+                    initialGuess[i] = 1.0; // default non-zero
+            }
+            // For 1D problems, leave initial guess as 0 (Golden Section Search)
+
+            SolverResult result = _nlpSolverManager.Solve(initialGuess);
+
+            _outputText =
+                $"Algorithm used: {result.AlgorithmUsed}\r\n" +
+                $"Final Value: {result.FinalValue:F6}\r\n" +
+                $"Steps:\r\n{string.Join(Environment.NewLine, result.Steps)}";
+
+            rtbPreviewNLP.Text += "\r\n\r\n" + _outputText;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show("Solve Error: " + ex.Message);
+        }
+    }
+
+    private int CountVariables(string line)
+    {
+        int start = line.IndexOf('(');
+        int end = line.IndexOf(')');
+        if (start < 0 || end < 0 || end <= start)
+            throw new Exception("Invalid objective function format.");
+
+        string inside = line[(start + 1)..end].Trim();
+        return inside.Split(',', StringSplitOptions.RemoveEmptyEntries).Length;
+    }
+
+    private void button9_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
+
+    private void button8_Click(object sender, EventArgs e)
+    {
+        this.Hide();
+        startingForm startingForm = new startingForm();
+        startingForm.Show();
     }
 }
