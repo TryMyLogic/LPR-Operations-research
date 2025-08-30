@@ -252,22 +252,24 @@ public class Branch_Bound : IBranchAndBound
         sb.AppendLine("=== Branch and Bound Results ===");
         foreach (var branch in CompletedBranches)
         {
-
-            double zValue = branch.Tableau.Tableau[0, branch.Tableau.TotalVars];
-            if (branch.Tableau.IsMaximization)
+            if (branch.Status == "Optimal (Integer Feasible)")
             {
-                if (zValue > bestZ)
+                double zValue = branch.Tableau.Tableau[0, branch.Tableau.TotalVars];
+                if (branch.Tableau.IsMaximization)
                 {
-                    bestZ = zValue;
-                    best = branch.Tableau;
+                    if (zValue > bestZ)
+                    {
+                        bestZ = zValue;
+                        best = branch.Tableau;
+                    }
                 }
-            }
-            else
-            {
-                if (zValue < bestZ || bestZ == double.NegativeInfinity)
+                else
                 {
-                    bestZ = zValue;
-                    best = branch.Tableau;
+                    if (zValue < bestZ || bestZ == double.NegativeInfinity)
+                    {
+                        bestZ = zValue;
+                        best = branch.Tableau;
+                    }
                 }
             }
         }
