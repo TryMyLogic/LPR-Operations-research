@@ -6,6 +6,12 @@ namespace OperationsLogic.Algorithms;
 
 public class SimplexSolver : ISolver
 {
+
+    public double[,] FinalTableau { get; private set; } = new double[0, 0];
+    public int NumDecisionVars { get; private set; } = 0;
+    public int NumSlackVars { get; private set; } = 0;
+    public int NumExcessVars { get; private set; } = 0;
+
     public void Solve(LinearModel model, out string output)
     {
         StringBuilder sb = new();
@@ -19,16 +25,34 @@ public class SimplexSolver : ISolver
 
         int n = objCoeffs.Count;
         int m = model.Constraints.Count;
-        int totalVars = n + m;
+        int totalVars = n + m;        
+
+        NumDecisionVars = n;
+        NumSlackVars = 0;
+        NumExcessVars = 0;
+
         double[,] tableau = new double[m + 1, totalVars + 1];
 
         for (int i = 0; i < m; i++)
         {
-            if (model.Constraints[i].Relation != "<=")
-                _ = sb.AppendLine($"Warning: Constraint {i + 1} uses {model.Constraints[i].Relation}; only <= supported.");
             for (int j = 0; j < n; j++)
                 tableau[i, j] = model.Constraints[i].Coefficients[j];
-            tableau[i, n + i] = 1;
+
+            if (model.Constraints[i].Relation == "<=")
+            {
+                tableau[i, n + i] = 1;
+                NumSlackVars++;
+            }
+            else if (model.Constraints[i].Relation == ">=")
+            {
+                tableau[i, n + i] = -1;
+                NumExcessVars++;
+            }
+            else
+            {
+                _ = sb.AppendLine($"Warning: Constraint {i + 1} uses {model.Constraints[i].Relation}; only <= or >= supported.");
+            }
+
             tableau[i, totalVars] = model.Constraints[i].RHS;
         }
 
@@ -80,7 +104,7 @@ public class SimplexSolver : ISolver
             PrintTableau(tableau, sb);
         }
 
-        double objValue = isMax ? tableau[m, totalVars] : -tableau[m, totalVars]; // Correct sign based on problem type
+        double objValue = isMax ? tableau[m, totalVars] : -tableau[m, totalVars];
         _ = sb.AppendLine($"Optimal Objective Value: {objValue:F3}");
         for (int j = 0; j < n; j++)
         {
@@ -89,6 +113,8 @@ public class SimplexSolver : ISolver
             if (row != -1) val = tableau[row, totalVars];
             _ = sb.AppendLine($"x{j + 1} = {val:F3}");
         }
+
+        FinalTableau = tableau;
 
         output = sb.ToString();
     }
@@ -104,5 +130,36 @@ public class SimplexSolver : ISolver
             _ = sb.AppendLine();
         }
         _ = sb.AppendLine();
+    }
+
+    public double[] GetVariableValues()
+    {
+        if (FinalTableau == null || FinalTableau.Length == 0)
+            throw new InvalidOperationException("Solver has not been run or FinalTableau is empty.");
+
+        int totalVars = FinalTableau.GetLength(1) - 1;
+        int rows = FinalTableau.GetLength(0) - 1;
+
+        double[] values = new double[totalVars];
+
+        for (int j = 0; j < totalVars; j++)
+        {
+            int oneRow = -1;
+            bool isUnit = true;
+            for (int i = 0; i < rows; i++)
+            {
+                if (FinalTableau[i, j] == 1 && oneRow == -1)
+                    oneRow = i;
+                else if (FinalTableau[i, j] != 0)
+                {
+                    isUnit = false;
+                    break;
+                }
+            }
+
+            values[j] = isUnit && oneRow != -1 ? FinalTableau[oneRow, totalVars] : 0.0;
+        }
+
+        return values;
     }
 }
