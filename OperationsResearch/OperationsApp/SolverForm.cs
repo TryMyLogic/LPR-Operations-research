@@ -1,6 +1,4 @@
-
-﻿using OperationsApp;
-
+using OperationsApp;
 using OperationsLogic.Algorithms;
 using OperationsLogic.Misc;
 
@@ -49,7 +47,7 @@ public partial class SolverForm : Form
     private void btnB_B_Click(object sender, EventArgs e)
     {
         rtbOutput.Text = "Branch And Bound Simplex Algorithm not implemented yet.";
-        var bnb = new Branch_Bound();
+        
         // i neeed the optimal table from simplex/dual simplex to perform the process on it
         //bnb.B_BProcess(initialTableau);
 
