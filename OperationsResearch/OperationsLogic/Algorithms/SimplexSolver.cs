@@ -15,7 +15,10 @@ public class SimplexSolver : ISolver
     public void Solve(LinearModel model, out string output)
     {
         StringBuilder sb = new();
+        
+        sb.AppendLine("==============================");
         _ = sb.AppendLine("Primal Simplex Iterations:");
+        sb.AppendLine("==============================");
 
         bool isMax = model.Type == "max";
         List<double> objCoeffs = [.. model.ObjectiveCoefficients];
