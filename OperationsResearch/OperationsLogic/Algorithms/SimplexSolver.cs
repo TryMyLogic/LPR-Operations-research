@@ -11,6 +11,8 @@ public class SimplexSolver : ISolver
     public int NumDecisionVars { get; private set; } = 0;
     public int NumSlackVars { get; private set; } = 0;
     public int NumExcessVars { get; private set; } = 0;
+    public int NumTotalVars => NumDecisionVars + NumExcessVars + NumSlackVars;
+    public bool IsMax { get; private set; } = false;
 
     public void Solve(LinearModel model, out string output)
     {
@@ -20,6 +22,7 @@ public class SimplexSolver : ISolver
         sb.AppendLine("==============================");
 
         bool isMax = model.Type == "max";
+        IsMax = isMax;
         List<double> objCoeffs = [.. model.ObjectiveCoefficients];
         if (!isMax)
             for (int i = 0; i < objCoeffs.Count; i++)
