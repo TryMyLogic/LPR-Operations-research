@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Text;
 using OperationsLogic.Algorithms;
 using OperationsLogic.Model;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OperationsLogic;
 
