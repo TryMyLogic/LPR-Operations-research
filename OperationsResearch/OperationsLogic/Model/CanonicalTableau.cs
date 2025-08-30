@@ -398,7 +398,7 @@ public class CanonicalTableau
                 else if (col == DecisionVars)
                 {
                     newNonCanonicalTableau[row, col] = newColumnValues[row];
-                    newTableau[row, col] = row == 0 ? -newColumnValues[row] : newColumnValues[row]; 
+                    newTableau[row, col] = row == 0 ? -newColumnValues[row] : newColumnValues[row];
                 }
                 else if (col < newTotalVars)
                 {
@@ -593,7 +593,7 @@ public class CanonicalTableau
         return DenseVector.OfArray(cBV).DotProduct(DenseVector.OfArray(bStar));
     }
 
-    private double[,] ConstructMathPrelimOptimalTableau(MathPreliminariesResult calc, double[] newColumnValues = null)
+    private double[,] ConstructMathPrelimOptimalTableau(MathPreliminariesResult calc, double[]? newColumnValues = null)
     {
         int totalVars = newColumnValues != null ? TotalVars + 1 : TotalVars;
         double[,] optimalTableau = new double[Rows, totalVars + 1];
