@@ -19,7 +19,7 @@ interface IBranchAndBound
 }
 public class Branch_Bound : IBranchAndBound
 {
-    public List<CanonicalTableau> CompletedBranches { get; } = new();
+    public List<(string Status, CanonicalTableau Tableau)> CompletedBranches { get; } = new();
 
     public int B_BDetermineBranchRowIndex(double[] rhsValues)
     {
@@ -218,7 +218,7 @@ public class Branch_Bound : IBranchAndBound
 
         if (branchRowIndex == -1)
         {
-            CompletedBranches.Add(solvedTableau);
+            CompletedBranches.Add(("Optimal (Integer Feasible)", solvedTableau));
             return;
         }
         //floor 
@@ -229,7 +229,7 @@ public class Branch_Bound : IBranchAndBound
         }
         catch
         {
-            CompletedBranches.Add(solvedTableau);
+            CompletedBranches.Add(("Infeasible (Floor branch)", solvedTableau));
         }
 
        //ceiling
@@ -240,24 +240,26 @@ public class Branch_Bound : IBranchAndBound
         }
         catch
         {
-            CompletedBranches.Add(solvedTableau);
+            CompletedBranches.Add(("Infeasible (Ceil branch)",solvedTableau));
         }
     }
 
-    public void BestBranch(out string output, out CanonicalTableau bestTableau)
+    public (string,CanonicalTableau) BestBranch(string output, CanonicalTableau bestTableau)
     {
         StringBuilder sb = new();
         double bestZ = double.NegativeInfinity;
         CanonicalTableau? best = null;
+        sb.AppendLine("=== Branch and Bound Results ===");
         foreach (var branch in CompletedBranches)
         {
-            double zValue = branch.Tableau[0, branch.TotalVars];
-            if (branch.IsMaximization)
+
+            double zValue = branch.Tableau.Tableau[0, branch.Tableau.TotalVars];
+            if (branch.Tableau.IsMaximization)
             {
                 if (zValue > bestZ)
                 {
                     bestZ = zValue;
-                    best = branch;
+                    best = branch.Tableau;
                 }
             }
             else
@@ -265,7 +267,7 @@ public class Branch_Bound : IBranchAndBound
                 if (zValue < bestZ || bestZ == double.NegativeInfinity)
                 {
                     bestZ = zValue;
-                    best = branch;
+                    best = branch.Tableau;
                 }
             }
         }
@@ -273,14 +275,14 @@ public class Branch_Bound : IBranchAndBound
         {
             sb.AppendLine("=== Best Branch ===");
             sb.AppendLine(best.DisplayTableau());
-            sb.AppendLine($"Optimal Z: {Math.Round(bestZ, 3)}");
+            sb.AppendLine($"Optimal Z: {Math.Round(bestZ, 3)} ");
         }
         else
         {
             sb.AppendLine("No feasible branches found.");
         }
-        output = sb.ToString();
-        bestTableau = best ?? new CanonicalTableau();
+        return (output = sb.ToString(),bestTableau = best ?? new CanonicalTableau()); 
+        
     }
 
 
