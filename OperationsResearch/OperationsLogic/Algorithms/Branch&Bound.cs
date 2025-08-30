@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Text;
 using OperationsLogic.Algorithms;
 using OperationsLogic.Model;
-
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OperationsLogic;
 
 interface IBranchAndBound
 {
+    int B_BDetermineBranchRowIndex(double[] rhsValues) { return -1; }
     int B_BDetermineTargetColumnIndex(double[,] xValues, int rowindex) { return -1; }
     void B_BProcess(CanonicalTableau tableau) { }
 }
@@ -23,8 +16,8 @@ public class Branch_Bound : IBranchAndBound
 
     public int B_BDetermineBranchRowIndex(double[] rhsValues)
     {
-        if (rhsValues == null || rhsValues.Length == 0)
-            throw new ArgumentException("Array cannot be null or empty.");
+        //if (rhsValues == null || rhsValues.Length == 0)
+            //throw new ArgumentException("Array cannot be null or empty.");
 
         int index = -1;
 
@@ -242,9 +235,13 @@ public class Branch_Bound : IBranchAndBound
         {
             CompletedBranches.Add(("Infeasible (Ceil branch)",solvedTableau));
         }
+        if (CompletedBranches.Count == 1)
+        {
+            CompletedBranches.Add(("Infeasible (No feasible branches)", solvedTableau));
+        }
     }
 
-    public (string,CanonicalTableau) BestBranch(string output, CanonicalTableau bestTableau)
+    public (string,CanonicalTableau) BestBranch()
     {
         StringBuilder sb = new();
         double bestZ = double.NegativeInfinity;
@@ -283,7 +280,8 @@ public class Branch_Bound : IBranchAndBound
         {
             sb.AppendLine("No feasible branches found.");
         }
-        return (output = sb.ToString(),bestTableau = best ?? new CanonicalTableau()); 
+        CanonicalTableau bestTableau;
+        return (sb.ToString(), bestTableau = best ?? new CanonicalTableau()); 
         
     }
 
