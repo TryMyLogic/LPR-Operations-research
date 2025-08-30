@@ -21,7 +21,7 @@ public partial class SolverForm : Form
         solvers.Add("Revised Simplex Algorithm", new RevisedSimplexSolver());
         solvers.Add("Branch And Bound Simplex Algorithm", new SimplexSolver());
         solvers.Add("Cutting Plane Algorithm", new SimplexSolver());
-        solvers.Add("Knapsack Branch and Bound Algorithm", new SimplexSolver());
+        solvers.Add("Knapsack Branch and Bound Algorithm", new KnapsackSolver());
     }
 
     private void btnFileUpload_Click(object sender, EventArgs e)
@@ -74,7 +74,7 @@ public partial class SolverForm : Form
 
     private void btnB_B_B_Click(object sender, EventArgs e)
     {
-        rtbOutput.Text = "Knapsack Branch and Bound Algorithm not implemented yet.";
+        SolveAndDisplay("Knapsack Branch and Bound Algorithm");
     }
 
     private void btnSaveLocation_Click(object sender, EventArgs e)
