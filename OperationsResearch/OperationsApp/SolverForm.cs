@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
-
 using OperationsApp;
 
+using OperationsLogic;
 using OperationsLogic.Algorithms;
 using OperationsLogic.Analysis;
 using OperationsLogic.Bonus_NLP;
@@ -59,7 +58,8 @@ public partial class SolverForm : Form
 
     private void btnB_B_Click(object sender, EventArgs e)
     {
-        rtbOutput.Text = "Branch And Bound Simplex Algorithm not implemented yet.";
+
+        SolveAndDisplayBandB("Branch And Bound Simplex Algorithm", richTextBox1);
     }
 
     private void btnCuttingPlane_Click(object sender, EventArgs e)
@@ -121,6 +121,52 @@ public partial class SolverForm : Form
                 {
                     tableauForSensitivity = null;
                 }
+            }
+            catch (Exception ex)
+            {
+                targetBox.Text = $"Error solving: {ex.Message}";
+            }
+        }
+        else
+        {
+            targetBox.Text = "Algorithm not implemented.";
+        }
+    }
+    private void SolveAndDisplayBandB(string algorithm, RichTextBox? outputBox = null)
+    {
+        if (model == null)
+        {
+            _ = MessageBox.Show("Please load an input file first.", "Warning");
+            return;
+        }
+
+        RichTextBox targetBox = outputBox ?? rtbOutput;
+        if (solvers.TryGetValue(algorithm, out ISolver? solver))
+        {
+            try
+            {
+                solver.Solve(model, out outputText);
+                Branch_Bound bab = new Branch_Bound();
+                CanonicalTableau CanonicalTableau = new CanonicalTableau();
+                CanonicalTableau.DecisionVars = ((SimplexSolver)solver).NumDecisionVars;
+                CanonicalTableau.SlackVars = ((SimplexSolver)solver).NumSlackVars;
+                CanonicalTableau.ExcessVars = ((SimplexSolver)solver).NumExcessVars;
+                CanonicalTableau.IsMaximization = ((SimplexSolver)solver).IsMax;
+                var table = ((SimplexSolver)solver).FinalTableau;
+                for (int i = 0; i < table.GetLength(0); i++)
+                {
+                    for (int j = 0; j < table.GetLength(1); j++)
+                    {
+                        table[i, j] = CanonicalTableau.Tableau[i, j];
+                    }
+                }
+
+                bab.B_BProcess(CanonicalTableau);
+                bab.CompletedBranches.ForEach(branch =>
+                {
+                    targetBox.Text += $"\nCompleted Branch - {branch.Status}\n";
+                    targetBox.Text += branch.Tableau.DisplayTableau() + "\n";
+                });
             }
             catch (Exception ex)
             {

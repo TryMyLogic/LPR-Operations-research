@@ -7,12 +7,14 @@ using OperationsLogic.Misc;
 
 namespace OperationsLogic.Algorithms
 {
+
     public class SimplexSolver : ISolver
     {
         public double[,] FinalTableau { get; private set; } = new double[0, 0];
         public int NumDecisionVars { get; private set; } = 0;
         public int NumSlackVars { get; private set; } = 0;
         public int NumExcessVars { get; private set; } = 0;
+        public bool IsMax  { get; private set; } = false;
 
         // NEW: store the basis column indices (length = m)
         public int[] BasisIndices { get; private set; } = Array.Empty<int>();
@@ -23,14 +25,18 @@ namespace OperationsLogic.Algorithms
         // NEW: original objective coefficients as given in model (not modified for max/min)
         public List<double> OriginalObjectiveCoeffs { get; private set; } = new List<double>();
 
+
         public void Solve(LinearModel model, out string output)
         {
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("==============================");
             sb.AppendLine("Simplex Iterations:");
             sb.AppendLine("==============================");
 
+
             bool isMax = model.Type == "max";
+            IsMax = isMax;
             List<double> objCoeffs = new List<double>(model.ObjectiveCoefficients);
             OriginalObjectiveCoeffs = new List<double>(model.ObjectiveCoefficients);
 
@@ -159,11 +165,13 @@ namespace OperationsLogic.Algorithms
             sb.AppendLine();
         }
 
+
         /// <summary>
         /// Compute simplex dual variables y by y^T = c_B^T * B^{-1}
         /// Returns null if unable to compute (missing basis/initial A or singular B).
         /// </summary>
         public double[]? GetDualVariables()
+
         {
             if (InitialConstraintMatrix == null || InitialConstraintMatrix.Length == 0) return null;
             if (BasisIndices == null || BasisIndices.Length == 0) return null;
@@ -261,6 +269,7 @@ namespace OperationsLogic.Algorithms
 
             return inv;
         }
+
     }
 
     public class DualitySolver
@@ -355,4 +364,22 @@ namespace OperationsLogic.Algorithms
             return sb.ToString();
         }
     }
+
 }
+
+        output = sb.ToString();
+    }
+
+    private void PrintTableau(double[,] tableau, StringBuilder sb)
+    {
+        int rows = tableau.GetLength(0);
+        int cols = tableau.GetLength(1);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+                _ = sb.Append($"{tableau[i, j]:F3}\t");
+            _ = sb.AppendLine();
+        }
+        _ = sb.AppendLine();
+    }
+

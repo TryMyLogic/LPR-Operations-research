@@ -33,7 +33,7 @@ public class Branch_Bound : IBranchAndBound
         {
             if ((int)rhsValues[i] != rhsValues[i]) // fractional value
             {
-                double fractionalPart = rhsValues[i] % 1;
+                double fractionalPart = Math.Abs(rhsValues[i] % 1);
                 double distance = Math.Abs(fractionalPart - 0.5);
 
                 if (index == -1 ||
@@ -53,11 +53,11 @@ public class Branch_Bound : IBranchAndBound
         // if no fractionals found, index stays -1
         return index;
     }
-        
+
     public int B_BDetermineTargetColumnIndex(double[,] xValues, int rowindex)
     {
         int columnIndex = -1;
-        //searching for the target column index of the column with the basic variable that correlates to the row index provided by B_BDetermineBranchRowIndex
+
         for (int i = 0; i < xValues.GetLength(1); i++)
         {
             double columnmax = 0;
@@ -74,16 +74,16 @@ public class Branch_Bound : IBranchAndBound
 
     }
 
-    private double[] CreateNewRow(int length, int targetIndex,int val,int rhsval)
+    private double[] CreateNewRow(int length, int targetIndex, int valindex, int val, int rhsval)
     {
-        double[] row = new double[length +1];
-        for (int i = 0; i < length+1; i++)
+        double[] row = new double[length];
+        for (int i = 0; i < length; i++)
         {
-            row[i] = 0; 
+            row[i] = 0;
         }
         row[targetIndex] = 1;
-        row[length] = val;
-        row[length+1] = rhsval;
+        row[valindex] = val;
+        row[length - 1] = rhsval;
         return row;
     }
 
@@ -104,8 +104,8 @@ public class Branch_Bound : IBranchAndBound
 
     public CanonicalTableau B_BAddNewConstraint(CanonicalTableau tableu, string branch)
     {
-        
-        double[] rhsValues= new double[tableu.Rows];
+
+        double[] rhsValues = new double[tableu.Rows];
         for (int i = 0; i < tableu.Rows; i++)
         {
             rhsValues[i] = tableu.Tableau[i, tableu.TotalVars];
@@ -140,27 +140,29 @@ public class Branch_Bound : IBranchAndBound
         {
             nthRhsValue = Math.Floor(nthRhsValue);
         }
-        double[] newRow = new double[tableu.TotalVars +1];
+        double[] newRow = new double[tableu.TotalVars + 1];
 
-        
+
         double[] updatedTargetRow = new double[tableu.TotalVars + 1];
         for (int i = 0; i < updatedTargetRow.Length; i++)
-            {
-                if (i != updatedTargetRow.Length)
+        {
+            if (i != updatedTargetRow.Length)
                 updatedTargetRow[i] = tableu.Tableau[rowIndex, i];
-                else
+            else
                 updatedTargetRow[i] = 0;
-            }
+        }
 
         double newRhsValue = rhsValues[rowIndex] - nthRhsValue;
-        
+        var location = 0;
         switch (branch)
         {
             case "<=":
-                newRow = CreateNewRow(tableu.TotalVars, columnIndex, 1, (int)nthRhsValue);
+                location = tableu.DecisionVars + tableu.ExcessVars + tableu.SlackVars;
+                newRow = CreateNewRow(newRow.Length, columnIndex, location, 1, (int)nthRhsValue);
                 break;
             case ">=":
-                newRow = CreateNewRow(tableu.TotalVars, columnIndex, -1, (int)nthRhsValue);
+                location = tableu.DecisionVars + tableu.ExcessVars;
+                newRow = CreateNewRow(newRow.Length, columnIndex, location, -1, (int)nthRhsValue);
                 break;
         }
         if (updatedTargetRow.Length != newRow.Length)
@@ -170,7 +172,7 @@ public class Branch_Bound : IBranchAndBound
         {
             nthXRow = AddNegativeToRow(nthXRow);
         }
-    
+
         // Reconstruct the tableau
         CanonicalTableau finaltableu = new CanonicalTableau();
         finaltableu.IsMaximization = tableu.IsMaximization;
@@ -183,14 +185,35 @@ public class Branch_Bound : IBranchAndBound
         {
             finaltableu.ExcessVars = tableu.ExcessVars + 1;
         }
-        
+
         finaltableu.Rows = tableu.Rows + 1;
 
+        for (int i = 0; i < tableu.Rows; i++)
+        {
+            for (int j = 0; j < tableu.TotalVars; j++)
+            {
+                if (j < location)
+                {
+                    finaltableu.Tableau[i, j] = tableu.Tableau[i, j];
+                }
+                else if (j == location - 1)
+                {
+                    finaltableu.Tableau[i, j] = 0;
+                }
+                else if (j > location)
+                {
+                    finaltableu.Tableau[i, j + 1] = tableu.Tableau[i, j];
+                }
+
+            }
+
+        }
 
         for (int i = 0; i < finaltableu.Rows; i++)
         {
             finaltableu.Tableau[finaltableu.Rows, i] = nthXRow[i];//add new row
         }
+
         return finaltableu;
 
 
@@ -212,7 +235,7 @@ public class Branch_Bound : IBranchAndBound
 
 
         //add displaytableau here if you want to see iterations
-        
+
 
 
 
@@ -232,7 +255,7 @@ public class Branch_Bound : IBranchAndBound
             CompletedBranches.Add(("Infeasible (Floor branch)", solvedTableau));
         }
 
-       //ceiling
+        //ceiling
         try
         {
             CanonicalTableau ceilBranch = B_BAddNewConstraint(solvedTableau, ">=");
@@ -240,11 +263,11 @@ public class Branch_Bound : IBranchAndBound
         }
         catch
         {
-            CompletedBranches.Add(("Infeasible (Ceil branch)",solvedTableau));
+            CompletedBranches.Add(("Infeasible (Ceil branch)", solvedTableau));
         }
     }
 
-    public (string,CanonicalTableau) BestBranch(string output, CanonicalTableau bestTableau)
+    public (string, CanonicalTableau) BestBranch()
     {
         StringBuilder sb = new();
         double bestZ = double.NegativeInfinity;
@@ -283,8 +306,8 @@ public class Branch_Bound : IBranchAndBound
         {
             sb.AppendLine("No feasible branches found.");
         }
-        return (output = sb.ToString(),bestTableau = best ?? new CanonicalTableau()); 
-        
+        return (sb.ToString(), best ?? new CanonicalTableau());
+
     }
 
 
