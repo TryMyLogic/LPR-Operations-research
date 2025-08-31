@@ -7,6 +7,7 @@ using OperationsLogic.Misc;
 
 namespace OperationsLogic.Algorithms
 {
+
     public class SimplexSolver : ISolver
     {
         public double[,] FinalTableau { get; private set; } = new double[0, 0];
@@ -23,12 +24,15 @@ namespace OperationsLogic.Algorithms
         // NEW: original objective coefficients as given in model (not modified for max/min)
         public List<double> OriginalObjectiveCoeffs { get; private set; } = new List<double>();
 
+
         public void Solve(LinearModel model, out string output)
         {
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("==============================");
             sb.AppendLine("Simplex Iterations:");
             sb.AppendLine("==============================");
+
 
             bool isMax = model.Type == "max";
             List<double> objCoeffs = new List<double>(model.ObjectiveCoefficients);
@@ -159,11 +163,13 @@ namespace OperationsLogic.Algorithms
             sb.AppendLine();
         }
 
+
         /// <summary>
         /// Compute simplex dual variables y by y^T = c_B^T * B^{-1}
         /// Returns null if unable to compute (missing basis/initial A or singular B).
         /// </summary>
         public double[]? GetDualVariables()
+
         {
             if (InitialConstraintMatrix == null || InitialConstraintMatrix.Length == 0) return null;
             if (BasisIndices == null || BasisIndices.Length == 0) return null;
@@ -261,6 +267,7 @@ namespace OperationsLogic.Algorithms
 
             return inv;
         }
+
     }
 
     public class DualitySolver
@@ -355,4 +362,6 @@ namespace OperationsLogic.Algorithms
             return sb.ToString();
         }
     }
+
 }
+
