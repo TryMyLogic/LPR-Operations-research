@@ -7,12 +7,14 @@ using OperationsLogic.Misc;
 
 namespace OperationsLogic.Algorithms
 {
+
     public class SimplexSolver : ISolver
     {
         public double[,] FinalTableau { get; private set; } = new double[0, 0];
         public int NumDecisionVars { get; private set; } = 0;
         public int NumSlackVars { get; private set; } = 0;
         public int NumExcessVars { get; private set; } = 0;
+        public bool IsMax  { get; private set; } = false;
 
         // NEW: store the basis column indices (length = m)
         public int[] BasisIndices { get; private set; } = Array.Empty<int>();
@@ -23,19 +25,24 @@ namespace OperationsLogic.Algorithms
         // NEW: original objective coefficients as given in model (not modified for max/min)
         public List<double> OriginalObjectiveCoeffs { get; private set; } = new List<double>();
 
+
         public void Solve(LinearModel model, out string output)
         {
+
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("==============================");
             sb.AppendLine("Simplex Iterations:");
             sb.AppendLine("==============================");
 
-        bool isMax = model.Type == "max";
-        IsMax = isMax;
-        List<double> objCoeffs = [.. model.ObjectiveCoefficients];
-        if (!isMax)
-            for (int i = 0; i < objCoeffs.Count; i++)
-                objCoeffs[i] = -objCoeffs[i];
+
+            bool isMax = model.Type == "max";
+            IsMax = isMax;
+            List<double> objCoeffs = new List<double>(model.ObjectiveCoefficients);
+            OriginalObjectiveCoeffs = new List<double>(model.ObjectiveCoefficients);
+
+            if (!isMax)
+                for (int i = 0; i < objCoeffs.Count; i++)
+                    objCoeffs[i] = -objCoeffs[i];
 
             int n = objCoeffs.Count;
             int m = model.Constraints.Count;
@@ -158,11 +165,13 @@ namespace OperationsLogic.Algorithms
             sb.AppendLine();
         }
 
+
         /// <summary>
         /// Compute simplex dual variables y by y^T = c_B^T * B^{-1}
         /// Returns null if unable to compute (missing basis/initial A or singular B).
         /// </summary>
         public double[]? GetDualVariables()
+
         {
             if (InitialConstraintMatrix == null || InitialConstraintMatrix.Length == 0) return null;
             if (BasisIndices == null || BasisIndices.Length == 0) return null;
@@ -260,6 +269,7 @@ namespace OperationsLogic.Algorithms
 
             return inv;
         }
+
     }
 
     public class DualitySolver
@@ -355,34 +365,21 @@ namespace OperationsLogic.Algorithms
         }
     }
 
-    public double[] GetVariableValues()
-    {
-        if (FinalTableau == null || FinalTableau.Length == 0)
-            throw new InvalidOperationException("Solver has not been run or FinalTableau is empty.");
-
-        int totalVars = FinalTableau.GetLength(1) - 1;
-        int rows = FinalTableau.GetLength(0) - 1;
-
-        double[] values = new double[totalVars];
-
-        for (int j = 0; j < totalVars; j++)
-        {
-            int oneRow = -1;
-            bool isUnit = true;
-            for (int i = 0; i < rows; i++)
-            {
-                if (FinalTableau[i, j] == 1 && oneRow == -1)
-                    oneRow = i;
-                else if (FinalTableau[i, j] != 0)
-                {
-                    isUnit = false;
-                    break;
-                }
-            }
-
-            values[j] = isUnit && oneRow != -1 ? FinalTableau[oneRow, totalVars] : 0.0;
-        }
-
-        return values;
-    }
 }
+
+        output = sb.ToString();
+    }
+
+    private void PrintTableau(double[,] tableau, StringBuilder sb)
+    {
+        int rows = tableau.GetLength(0);
+        int cols = tableau.GetLength(1);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+                _ = sb.Append($"{tableau[i, j]:F3}\t");
+            _ = sb.AppendLine();
+        }
+        _ = sb.AppendLine();
+    }
+
