@@ -483,5 +483,50 @@ public partial class SolverForm : Form
 
         rtbSensitivity.Text = output;
     }
+
+    private void btnTestDuality_Click(object sender, EventArgs e)
+    {
+        DualitySolver ds = new DualitySolver();
+        ds.TestDuality(model, out string output);
+
+        rtbDualityOutput.Text = output;
+    }
+
+    private void btnDualityBack_Click(object sender, EventArgs e)
+    {
+        this.Hide();
+        startingForm startingForm = new startingForm();
+        startingForm.Show();
+    }
+
+    private void btnDualityExit_Click(object sender, EventArgs e)
+    {
+        Application.Exit();
+    }
+
+    private void btnDualitySave_Click(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(outputText))
+        {
+            _ = MessageBox.Show("No output to save. Solve the model first.", "Warning");
+            return;
+        }
+
+        using SaveFileDialog saveFileDialog = new();
+        saveFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+        {
+            try
+            {
+                File.WriteAllText(saveFileDialog.FileName, outputText);
+                txtDualtiySaveLocation.Text = saveFileDialog.FileName;
+                _ = MessageBox.Show("Output saved successfully.", "Success");
+            }
+            catch (Exception ex)
+            {
+                _ = MessageBox.Show("Error saving file: " + ex.Message, "Error");
+            }
+        }
+    }
 }
 
