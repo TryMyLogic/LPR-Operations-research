@@ -180,9 +180,26 @@ public class CanonicalTableau
         IsMaximization = isMaximization;
         SignRestrictions = signRestrictions;
     }
-   
+
 
     #region Tableau manipulation
+    public static (bool, string model) IsOptimal(CanonicalTableau tableau)
+    {
+        // Check objective row for negative values. If obj negative, perform Primal Simplex
+        for (int col = 0; col < tableau.TotalVars; col++)
+        {
+            if (tableau.Tableau[0, col] < 0)
+                return (false, "Primal Simplex");
+        }
+
+        // Check RHS column for negative values. If RHS negative, perform Dual Simplex
+        double[] rhsColumn = tableau.GetColumn(tableau.TotalVars);
+        if (rhsColumn.Any(value => value < 0))
+            return (false, "Dual Simplex");
+
+        return (true, "");
+    }
+
     public string DisplayTableau(double[]? thetas = null, bool displayNonCanonical = false)
     {
         StringBuilder sb = new();
@@ -434,7 +451,7 @@ public class CanonicalTableau
     #endregion
 
     #region Utility Functions
-    private bool IsSlackVariable(int columnIndex)
+    public bool IsSlackVariable(int columnIndex)
     {
         // Since slack is always added after excess. Check index between
         return columnIndex >= DecisionVars + ExcessVars && columnIndex < TotalVars;

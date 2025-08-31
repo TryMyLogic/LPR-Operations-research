@@ -110,6 +110,7 @@ partial class startingForm
         Controls.Add(label1);
         Name = "startingForm";
         Text = "Welcome to LinearPro";
+        Load += startingForm_Load;
         ResumeLayout(false);
         PerformLayout();
     }

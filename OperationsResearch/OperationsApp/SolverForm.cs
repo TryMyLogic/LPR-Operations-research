@@ -33,7 +33,7 @@ public partial class SolverForm : Form
         solvers.Add("Simplex Algorithm", new SimplexSolver());
         solvers.Add("Revised Simplex Algorithm", new RevisedSimplexSolver());
         solvers.Add("Branch And Bound Simplex Algorithm", new SimplexSolver());
-        solvers.Add("Cutting Plane Algorithm", new SimplexSolver());
+        solvers.Add("Cutting Plane Algorithm", new CuttingPlane());
         solvers.Add("Knapsack Branch and Bound Algorithm", new KnapsackSolver());
     }
 
@@ -59,7 +59,7 @@ public partial class SolverForm : Form
 
     private void btnCuttingPlane_Click(object sender, EventArgs e)
     {
-        rtbOutput.Text = "Cutting Plane Algorithm not implemented yet.";
+        SolveAndDisplay("Cutting Plane Algorithm", cuttingPlaneTextbox);
     }
 
     private void btnB_B_B_Click(object sender, EventArgs e)
@@ -92,7 +92,7 @@ public partial class SolverForm : Form
         }
     }
 
-    private void SolveAndDisplay(string algorithm)
+    private void SolveAndDisplay(string algorithm, RichTextBox? outputBox = null)
     {
         if (model == null)
         {
@@ -100,21 +100,23 @@ public partial class SolverForm : Form
             return;
         }
 
+        RichTextBox targetBox = outputBox ?? rtbOutput;
+
         if (solvers.TryGetValue(algorithm, out ISolver? solver))
         {
             try
             {
                 solver.Solve(model, out outputText);
-                rtbOutput.Text = outputText;
+                targetBox.Text = outputText;
             }
             catch (Exception ex)
             {
-                rtbOutput.Text = $"Error solving: {ex.Message}";
+                targetBox.Text = $"Error solving: {ex.Message}";
             }
         }
         else
         {
-            rtbOutput.Text = "Algorithm not implemented.";
+            targetBox.Text = "Algorithm not implemented.";
         }
     }
 
@@ -341,5 +343,10 @@ public partial class SolverForm : Form
         this.Hide();
         startingForm startingForm = new startingForm();
         startingForm.Show();
+    }
+
+    private void SolverForm_Load_1(object sender, EventArgs e)
+    {
+
     }
 }
