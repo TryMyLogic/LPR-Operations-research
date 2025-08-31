@@ -627,7 +627,7 @@ public class CanonicalTableau
         return optimalTableau;
     }
 
-    private MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
+    public MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
     {
         if (xBVIndices.Count == 0)
             throw new InvalidOperationException("No basic variables found in table");

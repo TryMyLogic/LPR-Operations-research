@@ -45,6 +45,13 @@
             button5 = new Button();
             button2 = new Button();
             tabSenAnalysis = new TabPage();
+            btnSensitivity = new Button();
+            label5 = new Label();
+            label4 = new Label();
+            label3 = new Label();
+            nudNewValue = new NumericUpDown();
+            nudVarIndex = new NumericUpDown();
+            rtbSensitivity = new RichTextBox();
             tabNLP = new TabPage();
             button8 = new Button();
             button9 = new Button();
@@ -57,6 +64,9 @@
             tabSimplex.SuspendLayout();
             tabBaB.SuspendLayout();
             tabCuttingPlane.SuspendLayout();
+            tabSenAnalysis.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)nudNewValue).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)nudVarIndex).BeginInit();
             tabNLP.SuspendLayout();
             SuspendLayout();
             // 
@@ -366,11 +376,78 @@
             // tabSenAnalysis
             // 
             tabSenAnalysis.BackColor = SystemColors.ActiveCaption;
+            tabSenAnalysis.Controls.Add(btnSensitivity);
+            tabSenAnalysis.Controls.Add(label5);
+            tabSenAnalysis.Controls.Add(label4);
+            tabSenAnalysis.Controls.Add(label3);
+            tabSenAnalysis.Controls.Add(nudNewValue);
+            tabSenAnalysis.Controls.Add(nudVarIndex);
+            tabSenAnalysis.Controls.Add(rtbSensitivity);
             tabSenAnalysis.Location = new Point(4, 30);
             tabSenAnalysis.Name = "tabSenAnalysis";
             tabSenAnalysis.Size = new Size(1720, 853);
             tabSenAnalysis.TabIndex = 3;
             tabSenAnalysis.Text = "Sensitivity Analysis";
+            // 
+            // btnSensitivity
+            // 
+            btnSensitivity.Location = new Point(314, 466);
+            btnSensitivity.Name = "btnSensitivity";
+            btnSensitivity.Size = new Size(161, 94);
+            btnSensitivity.TabIndex = 6;
+            btnSensitivity.Text = "Run Sensitivity Analysis";
+            btnSensitivity.UseVisualStyleBackColor = true;
+            btnSensitivity.Click += btnSensitivity_Click;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(7, 164);
+            label5.Name = "label5";
+            label5.Size = new Size(92, 21);
+            label5.TabIndex = 5;
+            label5.Text = "New Value";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(7, 88);
+            label4.Name = "label4";
+            label4.Size = new Size(120, 21);
+            label4.TabIndex = 4;
+            label4.Text = "Variable Index";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline);
+            label3.Location = new Point(198, 44);
+            label3.Name = "label3";
+            label3.Size = new Size(214, 29);
+            label3.TabIndex = 3;
+            label3.Text = "Sensitivity Analysis";
+            // 
+            // nudNewValue
+            // 
+            nudNewValue.Location = new Point(7, 188);
+            nudNewValue.Name = "nudNewValue";
+            nudNewValue.Size = new Size(120, 29);
+            nudNewValue.TabIndex = 2;
+            // 
+            // nudVarIndex
+            // 
+            nudVarIndex.Location = new Point(7, 112);
+            nudVarIndex.Name = "nudVarIndex";
+            nudVarIndex.Size = new Size(120, 29);
+            nudVarIndex.TabIndex = 1;
+            // 
+            // rtbSensitivity
+            // 
+            rtbSensitivity.Location = new Point(198, 76);
+            rtbSensitivity.Name = "rtbSensitivity";
+            rtbSensitivity.Size = new Size(397, 384);
+            rtbSensitivity.TabIndex = 0;
+            rtbSensitivity.Text = "";
             // 
             // tabNLP
             // 
@@ -476,6 +553,10 @@
             tabBaB.PerformLayout();
             tabCuttingPlane.ResumeLayout(false);
             tabCuttingPlane.PerformLayout();
+            tabSenAnalysis.ResumeLayout(false);
+            tabSenAnalysis.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)nudNewValue).EndInit();
+            ((System.ComponentModel.ISupportInitialize)nudVarIndex).EndInit();
             tabNLP.ResumeLayout(false);
             tabNLP.PerformLayout();
             ResumeLayout(false);
@@ -518,5 +599,12 @@
         private Button btnSolveNLP;
         private Button button8;
         private Button button9;
+        private Button btnSensitivity;
+        private Label label5;
+        private Label label4;
+        private Label label3;
+        private NumericUpDown nudNewValue;
+        private NumericUpDown nudVarIndex;
+        private RichTextBox rtbSensitivity;
     }
 }
