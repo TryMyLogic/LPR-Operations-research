@@ -37,11 +37,9 @@ public partial class startingForm : Form
             txtFileOutput.Text = path;
 
             try
-            { 
+            {
                 FileParser parser = new();
                 model1 = parser.Parse(path);
-
-                rtbOutput.Text = $"Model Type: {model1.Type}\nObjective: {string.Join(", ", model1.ObjectiveCoefficients)}\nConstraints: {model1.Constraints.Count}\nSigns: {string.Join(" ", model1.SignRestrictions)}";
             }
             catch (Exception ex)
             {
@@ -62,9 +60,13 @@ public partial class startingForm : Form
 
     private void btnContinue_Click(object sender, EventArgs e)
     {
-        SolverForm solverForm = new SolverForm(model1);
+        SolverForm solverForm = new(model1);
         solverForm.Show();
         this.Hide();
+    }
+
+    private void startingForm_Load(object sender, EventArgs e)
+    {
 
     }
 }
