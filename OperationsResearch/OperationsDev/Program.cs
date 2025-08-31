@@ -2,71 +2,54 @@
 
 // Console app used as an alternative to DisplayApp. It is purely for development purposes and will be dropped in production.
 
-using OperationsLogic.Algorithms;
-using OperationsLogic.Misc;
 using OperationsLogic.Model;
 
-// Create the tableau matrix
-//double[,] tableauData = new double[3, 5]
-//{
-//    { 0, 0, 1.25, 0.75, 41.25 }, // Z-row: x1, x2, S1, S2, RHS
-//    { 0, 1, 2.25, -0.25, 2.25 }, // Row 1: x2 basic
-//    { 1, 0, -1.25, 0.25, 3.75 }  // Row 2: x1 basic
-//};
+//string[] lines =
+//[
+//"min -50 -100 -20",
+//"+7 +2 +3 >= 28",
+//"+2 +12 +2 >= 24",
+//"+ + +"
+//];
 
-//double[,] noncanonicalTableauData = new double[3, 5]
-//{
-//    { 8, 5, 0,0,0 }, // Z-row: x1, x2, S1, S2, RHS
-//    { 1, 1, 1, 0, 6 }, // Row 1: x2 basic
-//    {9, 5, 0, 1, 45 }  // Row 2: x1 basic
-//};
+//string[] lines =
+//[
+//"min -50 -100",
+//"+7 +2 >= 28",
+//"+2 +12 >= 24",
+//"+ +"
+//];
 
-//double[,] tableauData = new double[3, 5]
-//{
-//    { -8, -5, 0,0,0 }, // Z-row: x1, x2, S1, S2, RHS
-//    { 1, 1, 1, 0, 6 }, // Row 1: x2 basic
-//    {9, 5, 0, 1, 45 }  // Row 2: x1 basic
-//};
+string[] lines =
+    [
+    "max +3 +2",
+    "+2 +1 <= 100",
+    "+1 +1 <= 80",
+    "+1 +0 <= 40",
+     "+ +"
+    ];
 
-//// Initialize CanonicalTableau
-//CanonicalTableau tableau = new(
-//    decisionVars: 2,
-//    excessVars: 0,
-//    slackVars: 2,
-//    isMaximization: true,
-//    signRestrictions: ["int", "int"],
-//    noncanonicaltableau: noncanonicalTableauData,
-//    tableau: tableauData
-//);
-//string output = CuttingPlane.Solve(tableau);
-//Console.WriteLine(output);
+CanonicalTableau tableau = new(lines);
 
-try
+double[,] solvedTableau = new double[4, 6]
 {
-    LinearModel model = new(
-            type: "max",
-            objectiveCoefficients: [8, 5], // Updated for 8x1 + 5x2
-            constraints:
-            [
-                new OperationsLogic.Misc.Constraint([1, 1], "<=", 6),  // x1 + x2 <= 6 (Labour)
-            new OperationsLogic.Misc.Constraint([9, 5], "<=", 45), // 9x1 + 5x2 <= 45 (Wood)
-            ],
-            signRestrictions: ["int", "int"]
-        );
+            { 0, 0, 1, 1, 0, 180 },
+            { 0, 1, -1, 2, 0, 60 },
+            { 0, 0, -1, 1, 1, 20 },
+            { 1, 0, 1, -1, 0, 20 }
+};
 
-    CuttingPlane solver = new();
+int decisionVars = 2;
+int excessVars = 0;
+int slackVars = 3;
+bool isMaximization = true;
+string[] signRestrictions = ["+", "+"];
 
-    solver.Solve(model, out string output);
+tableau = new(decisionVars, excessVars, slackVars, isMaximization, signRestrictions, solvedTableau, tableau.NonCanonicalTableau);
+Console.WriteLine("Non Canonical");
+Console.WriteLine(tableau.DisplayTableau(null, true));
 
-    Console.WriteLine("Output from CuttingPlane.Solve:");
-    Console.WriteLine(output);
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Error: {ex.Message}");
-    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
-}
-
-Console.WriteLine("\nPress any key to exit...");
-Console.ReadKey();
-
+double[] newValues = [1, 0, 0, 1];
+CanonicalTableau newTableau = tableau.AddActivity(newValues);
+Console.WriteLine("Canonical (After new activity)");
+Console.WriteLine(newTableau.DisplayTableau());

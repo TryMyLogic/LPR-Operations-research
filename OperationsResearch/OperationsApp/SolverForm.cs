@@ -1,4 +1,6 @@
-﻿using OperationsApp;
+﻿using System.Diagnostics;
+
+using OperationsApp;
 
 using OperationsLogic.Algorithms;
 using OperationsLogic.Analysis;
@@ -94,73 +96,7 @@ public partial class SolverForm : Form
             }
         }
     }
-    private CanonicalTableau BuildCanonicalTableauFromModel(LinearModel model)
-    {
-        int n = model.ObjectiveCoefficients.Count;
-        int m = model.Constraints.Count;
-
-        int slackCount = model.Constraints.Count(c => c.Relation == "<=");
-        int excessCount = model.Constraints.Count(c => c.Relation == ">=");
-
-        int totalVars = n + slackCount + excessCount;
-        double[,] tableau = new double[m + 1, totalVars + 1];
-        double[,] nonCanonical = new double[m + 1, totalVars + 1];
-
-        bool isMax = model.Type == "max";
-
-        int slackIndex = 0;
-        int excessIndex = 0;
-        for (int i = 0; i < m; i++)
-        {
-            var c = model.Constraints[i];
-            for (int j = 0; j < n; j++)
-            {
-                tableau[i, j] = c.Coefficients[j];
-                nonCanonical[i, j] = c.Coefficients[j];
-            }
-
-            if (c.Relation == "<=")
-            {
-                tableau[i, n + excessCount + slackIndex] = 1;
-                nonCanonical[i, n + excessCount + slackIndex] = 1;
-                slackIndex++;
-            }
-            else if (c.Relation == ">=")
-            {
-                tableau[i, n + excessIndex] = -1;
-                nonCanonical[i, n + excessIndex] = -1;
-                excessIndex++;
-            }
-            else
-            {
-                throw new InvalidOperationException($"Constraint {i + 1} has unsupported relation {c.Relation}");
-            }
-
-            tableau[i, totalVars] = c.RHS;
-            nonCanonical[i, totalVars] = c.RHS;
-        }
-
-        for (int j = 0; j < n; j++)
-            tableau[m, j] = isMax ? -model.ObjectiveCoefficients[j] : model.ObjectiveCoefficients[j];
-
-        tableau[m, totalVars] = 0;
-
-        for (int j = 0; j < n; j++)
-            nonCanonical[m, j] = model.ObjectiveCoefficients[j];
-
-        nonCanonical[m, totalVars] = 0;
-
-        return new CanonicalTableau(
-            decisionVars: n,
-            excessVars: excessCount,
-            slackVars: slackCount,
-            isMaximization: isMax,
-            signRestrictions: model.SignRestrictions,
-            tableau: tableau,
-            noncanonicaltableau: nonCanonical
-        );
-    }
-
+   
     private void SolveAndDisplay(string algorithm, RichTextBox? outputBox = null)
     {
         if (model == null)
@@ -179,7 +115,7 @@ public partial class SolverForm : Form
                 targetBox.Text = outputText;
                 if (solver is SimplexSolver)
                 {
-                    tableauForSensitivity = BuildCanonicalTableauFromModel(model);
+                    tableauForSensitivity = ModelConverter.ConvertToCanonicalTableau(model);
                 }
                 else
                 {
@@ -527,6 +463,96 @@ public partial class SolverForm : Form
                 _ = MessageBox.Show("Error saving file: " + ex.Message, "Error");
             }
         }
+    }
+
+    private void btnAddConstraint_Click(object sender, EventArgs e)
+    {
+        if (txtCoeff.Text.Length == 0)
+        {
+            MessageBox.Show("Please enter coefficents", "Warning");
+            return;
+        }
+        if (cbRelation.Text.Length == 0)
+        {
+            MessageBox.Show("Please enter relation", "Warning");
+            return;
+        }
+        if (txtRhs.Text.Length == 0)
+        {
+            MessageBox.Show("Please enter rhs", "Warning");
+            return;
+        }
+        if (tableauForSensitivity == null)
+        {
+            MessageBox.Show("Solve a model first using Simplex.", "Warning");
+            return;
+        }
+
+        string coefficientsText = txtCoeff.Text;
+        string relation = cbRelation.Text;
+        bool validRhs = double.TryParse(txtRhs.Text, out double rhs);
+
+        if (!validRhs)
+        {
+            MessageBox.Show("Ensure the RHS provided is a valid number", "Warning");
+            return;
+        }
+
+        string[] coeffs = coefficientsText.Split(' ');
+        if (coeffs.Length > tableauForSensitivity.DecisionVars)
+        {
+            MessageBox.Show($"Too many decision variables provided. The provided table has a max of {tableauForSensitivity.DecisionVars}", "Warning");
+            return;
+        }
+        double[] dCoeffs = new double[coeffs.Length];
+
+        int counter = 0;
+        foreach (string coeff in coeffs)
+        {
+            bool success = double.TryParse(coeff, out double value);
+            if (success)
+            {
+                dCoeffs[counter] = value;
+                counter++;
+            }
+        }
+
+        tableauForSensitivity = tableauForSensitivity.AddConstraint(dCoeffs, relation, rhs);
+        txtAddResult.Text = tableauForSensitivity.DisplayTableau();
+    }
+
+    private void btnAddActivity_Click(object sender, EventArgs e)
+    {
+        if (tableauForSensitivity == null)
+        {
+            MessageBox.Show("Solve a model first using Simplex.", "Warning");
+            return;
+        }
+
+        string newValuesProvided = txtActivityValues.Text;
+        string[] newValues = newValuesProvided.Split(' ');
+
+        double[] newColumnValues = new double[newValues.Length];
+        if (newColumnValues.Length != tableauForSensitivity.Rows)
+        {
+            MessageBox.Show($"The number of values provided did not match. The solved table has {tableauForSensitivity.Rows} rows", "Warning");
+            return;
+        }
+
+        int counter = 0;
+        foreach (string newValue in newValues)
+        {
+            Debug.WriteLine(newValue);
+            bool success = double.TryParse(newValue, out double value);
+            if (success)
+            {
+                newColumnValues[counter] = value;
+                counter++;
+            }
+        }
+
+        tableauForSensitivity = tableauForSensitivity.AddActivity(newColumnValues);
+        txtAddResult.Text = tableauForSensitivity.DisplayTableau();
     }
 }
 

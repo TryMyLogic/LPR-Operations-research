@@ -30,6 +30,14 @@
             tabSimplex = new TabPage();
             button3 = new Button();
             btnExit = new Button();
+            tabDuality = new TabPage();
+            txtDualtiySaveLocation = new TextBox();
+            btnDualitySave = new Button();
+            label6 = new Label();
+            rtbDualityOutput = new RichTextBox();
+            btnDualityBack = new Button();
+            btnDualityExit = new Button();
+            btnTestDuality = new Button();
             tabBaB = new TabPage();
             label1 = new Label();
             richTextBox1 = new RichTextBox();
@@ -45,6 +53,17 @@
             button5 = new Button();
             button2 = new Button();
             tabSenAnalysis = new TabPage();
+            txtAddResult = new RichTextBox();
+            label10 = new Label();
+            btnAddActivity = new Button();
+            txtActivityValues = new RichTextBox();
+            btnAddConstraint = new Button();
+            txtRhs = new TextBox();
+            txtCoeff = new TextBox();
+            cbRelation = new ComboBox();
+            label9 = new Label();
+            label8 = new Label();
+            label7 = new Label();
             btnSensitivity = new Button();
             label5 = new Label();
             label4 = new Label();
@@ -60,23 +79,15 @@
             rtbPreviewNLP = new RichTextBox();
             txtDisplayFileLocationNLP = new TextBox();
             btnLoadTextfileNLP = new Button();
-            tabDuality = new TabPage();
-            txtDualtiySaveLocation = new TextBox();
-            btnDualitySave = new Button();
-            label6 = new Label();
-            rtbDualityOutput = new RichTextBox();
-            btnDualityBack = new Button();
-            btnDualityExit = new Button();
-            btnTestDuality = new Button();
             tabControl1.SuspendLayout();
             tabSimplex.SuspendLayout();
+            tabDuality.SuspendLayout();
             tabBaB.SuspendLayout();
             tabCuttingPlane.SuspendLayout();
             tabSenAnalysis.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)nudNewValue).BeginInit();
             ((System.ComponentModel.ISupportInitialize)nudVarIndex).BeginInit();
             tabNLP.SuspendLayout();
-            tabDuality.SuspendLayout();
             SuspendLayout();
             // 
             // rtbOutput
@@ -228,6 +239,92 @@
             btnExit.Text = "Exit";
             btnExit.UseVisualStyleBackColor = true;
             btnExit.Click += btnExit_Click;
+            // 
+            // tabDuality
+            // 
+            tabDuality.BackColor = SystemColors.ActiveCaption;
+            tabDuality.Controls.Add(txtDualtiySaveLocation);
+            tabDuality.Controls.Add(btnDualitySave);
+            tabDuality.Controls.Add(label6);
+            tabDuality.Controls.Add(rtbDualityOutput);
+            tabDuality.Controls.Add(btnDualityBack);
+            tabDuality.Controls.Add(btnDualityExit);
+            tabDuality.Controls.Add(btnTestDuality);
+            tabDuality.Location = new Point(4, 30);
+            tabDuality.Name = "tabDuality";
+            tabDuality.Size = new Size(1720, 853);
+            tabDuality.TabIndex = 5;
+            tabDuality.Text = "Duality Section";
+            // 
+            // txtDualtiySaveLocation
+            // 
+            txtDualtiySaveLocation.Location = new Point(456, 811);
+            txtDualtiySaveLocation.Margin = new Padding(4, 3, 4, 3);
+            txtDualtiySaveLocation.Name = "txtDualtiySaveLocation";
+            txtDualtiySaveLocation.Size = new Size(382, 29);
+            txtDualtiySaveLocation.TabIndex = 23;
+            // 
+            // btnDualitySave
+            // 
+            btnDualitySave.Location = new Point(254, 786);
+            btnDualitySave.Margin = new Padding(4, 3, 4, 3);
+            btnDualitySave.Name = "btnDualitySave";
+            btnDualitySave.Size = new Size(194, 54);
+            btnDualitySave.TabIndex = 22;
+            btnDualitySave.Text = "Save Location";
+            btnDualitySave.UseVisualStyleBackColor = true;
+            btnDualitySave.Click += btnDualitySave_Click;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline, GraphicsUnit.Point, 0);
+            label6.Location = new Point(254, 38);
+            label6.Margin = new Padding(4, 0, 4, 0);
+            label6.Name = "label6";
+            label6.Size = new Size(537, 29);
+            label6.TabIndex = 21;
+            label6.Text = "Preview LP Form; Canonical Form; Final Answer:\r\n";
+            // 
+            // rtbDualityOutput
+            // 
+            rtbDualityOutput.Location = new Point(254, 73);
+            rtbDualityOutput.Margin = new Padding(4, 3, 4, 3);
+            rtbDualityOutput.Name = "rtbDualityOutput";
+            rtbDualityOutput.Size = new Size(584, 707);
+            rtbDualityOutput.TabIndex = 20;
+            rtbDualityOutput.Text = "";
+            // 
+            // btnDualityBack
+            // 
+            btnDualityBack.Location = new Point(1440, 801);
+            btnDualityBack.Name = "btnDualityBack";
+            btnDualityBack.Size = new Size(135, 48);
+            btnDualityBack.TabIndex = 19;
+            btnDualityBack.Text = "Back";
+            btnDualityBack.UseVisualStyleBackColor = true;
+            btnDualityBack.Click += btnDualityBack_Click;
+            // 
+            // btnDualityExit
+            // 
+            btnDualityExit.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnDualityExit.Location = new Point(1581, 801);
+            btnDualityExit.Name = "btnDualityExit";
+            btnDualityExit.Size = new Size(135, 48);
+            btnDualityExit.TabIndex = 18;
+            btnDualityExit.Text = "Exit";
+            btnDualityExit.UseVisualStyleBackColor = true;
+            btnDualityExit.Click += btnDualityExit_Click;
+            // 
+            // btnTestDuality
+            // 
+            btnTestDuality.Location = new Point(7, 697);
+            btnTestDuality.Name = "btnTestDuality";
+            btnTestDuality.Size = new Size(240, 83);
+            btnTestDuality.TabIndex = 1;
+            btnTestDuality.Text = "Test Duality";
+            btnTestDuality.UseVisualStyleBackColor = true;
+            btnTestDuality.Click += btnTestDuality_Click;
             // 
             // tabBaB
             // 
@@ -386,6 +483,17 @@
             // tabSenAnalysis
             // 
             tabSenAnalysis.BackColor = SystemColors.ActiveCaption;
+            tabSenAnalysis.Controls.Add(txtAddResult);
+            tabSenAnalysis.Controls.Add(label10);
+            tabSenAnalysis.Controls.Add(btnAddActivity);
+            tabSenAnalysis.Controls.Add(txtActivityValues);
+            tabSenAnalysis.Controls.Add(btnAddConstraint);
+            tabSenAnalysis.Controls.Add(txtRhs);
+            tabSenAnalysis.Controls.Add(txtCoeff);
+            tabSenAnalysis.Controls.Add(cbRelation);
+            tabSenAnalysis.Controls.Add(label9);
+            tabSenAnalysis.Controls.Add(label8);
+            tabSenAnalysis.Controls.Add(label7);
             tabSenAnalysis.Controls.Add(btnSensitivity);
             tabSenAnalysis.Controls.Add(label5);
             tabSenAnalysis.Controls.Add(label4);
@@ -398,6 +506,101 @@
             tabSenAnalysis.Size = new Size(1720, 853);
             tabSenAnalysis.TabIndex = 3;
             tabSenAnalysis.Text = "Sensitivity Analysis";
+            // 
+            // txtAddResult
+            // 
+            txtAddResult.Location = new Point(677, 332);
+            txtAddResult.Name = "txtAddResult";
+            txtAddResult.Size = new Size(735, 256);
+            txtAddResult.TabIndex = 17;
+            txtAddResult.Text = "";
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new Point(783, 187);
+            label10.Name = "label10";
+            label10.Size = new Size(149, 21);
+            label10.TabIndex = 16;
+            label10.Text = "One value per line";
+            // 
+            // btnAddActivity
+            // 
+            btnAddActivity.Location = new Point(677, 261);
+            btnAddActivity.Name = "btnAddActivity";
+            btnAddActivity.Size = new Size(136, 38);
+            btnAddActivity.TabIndex = 15;
+            btnAddActivity.Text = "AddActivity";
+            btnAddActivity.UseVisualStyleBackColor = true;
+            btnAddActivity.Click += btnAddActivity_Click;
+            // 
+            // txtActivityValues
+            // 
+            txtActivityValues.Location = new Point(677, 146);
+            txtActivityValues.Name = "txtActivityValues";
+            txtActivityValues.Size = new Size(100, 96);
+            txtActivityValues.TabIndex = 14;
+            txtActivityValues.Text = "";
+            // 
+            // btnAddConstraint
+            // 
+            btnAddConstraint.Location = new Point(676, 88);
+            btnAddConstraint.Name = "btnAddConstraint";
+            btnAddConstraint.Size = new Size(136, 38);
+            btnAddConstraint.TabIndex = 13;
+            btnAddConstraint.Text = "AddConstraint";
+            btnAddConstraint.UseVisualStyleBackColor = true;
+            btnAddConstraint.Click += btnAddConstraint_Click;
+            // 
+            // txtRhs
+            // 
+            txtRhs.Location = new Point(927, 38);
+            txtRhs.Name = "txtRhs";
+            txtRhs.Size = new Size(100, 29);
+            txtRhs.TabIndex = 12;
+            // 
+            // txtCoeff
+            // 
+            txtCoeff.Location = new Point(677, 38);
+            txtCoeff.Name = "txtCoeff";
+            txtCoeff.Size = new Size(100, 29);
+            txtCoeff.TabIndex = 11;
+            // 
+            // cbRelation
+            // 
+            cbRelation.FormattingEnabled = true;
+            cbRelation.Items.AddRange(new object[] { "<=", ">=", "=" });
+            cbRelation.Location = new Point(800, 38);
+            cbRelation.Name = "cbRelation";
+            cbRelation.Size = new Size(103, 29);
+            cbRelation.TabIndex = 10;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Location = new Point(927, 14);
+            label9.Name = "label9";
+            label9.Size = new Size(37, 21);
+            label9.TabIndex = 9;
+            label9.Text = "Rhs";
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Location = new Point(800, 14);
+            label8.Name = "label8";
+            label8.Size = new Size(74, 21);
+            label8.TabIndex = 8;
+            label8.Text = "Relation";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Location = new Point(676, 14);
+            label7.Name = "label7";
+            label7.Size = new Size(101, 21);
+            label7.TabIndex = 7;
+            label7.Text = "Coefficients";
             // 
             // btnSensitivity
             // 
@@ -543,92 +746,6 @@
             btnLoadTextfileNLP.UseVisualStyleBackColor = true;
             btnLoadTextfileNLP.Click += btnLoadTextfileNLP_Click;
             // 
-            // tabDuality
-            // 
-            tabDuality.BackColor = SystemColors.ActiveCaption;
-            tabDuality.Controls.Add(txtDualtiySaveLocation);
-            tabDuality.Controls.Add(btnDualitySave);
-            tabDuality.Controls.Add(label6);
-            tabDuality.Controls.Add(rtbDualityOutput);
-            tabDuality.Controls.Add(btnDualityBack);
-            tabDuality.Controls.Add(btnDualityExit);
-            tabDuality.Controls.Add(btnTestDuality);
-            tabDuality.Location = new Point(4, 30);
-            tabDuality.Name = "tabDuality";
-            tabDuality.Size = new Size(1720, 853);
-            tabDuality.TabIndex = 5;
-            tabDuality.Text = "Duality Section";
-            // 
-            // txtDualtiySaveLocation
-            // 
-            txtDualtiySaveLocation.Location = new Point(456, 811);
-            txtDualtiySaveLocation.Margin = new Padding(4, 3, 4, 3);
-            txtDualtiySaveLocation.Name = "txtDualtiySaveLocation";
-            txtDualtiySaveLocation.Size = new Size(382, 29);
-            txtDualtiySaveLocation.TabIndex = 23;
-            // 
-            // btnDualitySave
-            // 
-            btnDualitySave.Location = new Point(254, 786);
-            btnDualitySave.Margin = new Padding(4, 3, 4, 3);
-            btnDualitySave.Name = "btnDualitySave";
-            btnDualitySave.Size = new Size(194, 54);
-            btnDualitySave.TabIndex = 22;
-            btnDualitySave.Text = "Save Location";
-            btnDualitySave.UseVisualStyleBackColor = true;
-            btnDualitySave.Click += btnDualitySave_Click;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Microsoft Sans Serif", 18F, FontStyle.Underline, GraphicsUnit.Point, 0);
-            label6.Location = new Point(254, 38);
-            label6.Margin = new Padding(4, 0, 4, 0);
-            label6.Name = "label6";
-            label6.Size = new Size(537, 29);
-            label6.TabIndex = 21;
-            label6.Text = "Preview LP Form; Canonical Form; Final Answer:\r\n";
-            // 
-            // rtbDualityOutput
-            // 
-            rtbDualityOutput.Location = new Point(254, 73);
-            rtbDualityOutput.Margin = new Padding(4, 3, 4, 3);
-            rtbDualityOutput.Name = "rtbDualityOutput";
-            rtbDualityOutput.Size = new Size(584, 707);
-            rtbDualityOutput.TabIndex = 20;
-            rtbDualityOutput.Text = "";
-            // 
-            // btnDualityBack
-            // 
-            btnDualityBack.Location = new Point(1440, 801);
-            btnDualityBack.Name = "btnDualityBack";
-            btnDualityBack.Size = new Size(135, 48);
-            btnDualityBack.TabIndex = 19;
-            btnDualityBack.Text = "Back";
-            btnDualityBack.UseVisualStyleBackColor = true;
-            btnDualityBack.Click += btnDualityBack_Click;
-            // 
-            // btnDualityExit
-            // 
-            btnDualityExit.Font = new Font("Segoe UI", 14.25F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            btnDualityExit.Location = new Point(1581, 801);
-            btnDualityExit.Name = "btnDualityExit";
-            btnDualityExit.Size = new Size(135, 48);
-            btnDualityExit.TabIndex = 18;
-            btnDualityExit.Text = "Exit";
-            btnDualityExit.UseVisualStyleBackColor = true;
-            btnDualityExit.Click += btnDualityExit_Click;
-            // 
-            // btnTestDuality
-            // 
-            btnTestDuality.Location = new Point(7, 697);
-            btnTestDuality.Name = "btnTestDuality";
-            btnTestDuality.Size = new Size(240, 83);
-            btnTestDuality.TabIndex = 1;
-            btnTestDuality.Text = "Test Duality";
-            btnTestDuality.UseVisualStyleBackColor = true;
-            btnTestDuality.Click += btnTestDuality_Click;
-            // 
             // SolverForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -645,6 +762,8 @@
             tabControl1.ResumeLayout(false);
             tabSimplex.ResumeLayout(false);
             tabSimplex.PerformLayout();
+            tabDuality.ResumeLayout(false);
+            tabDuality.PerformLayout();
             tabBaB.ResumeLayout(false);
             tabBaB.PerformLayout();
             tabCuttingPlane.ResumeLayout(false);
@@ -655,8 +774,6 @@
             ((System.ComponentModel.ISupportInitialize)nudVarIndex).EndInit();
             tabNLP.ResumeLayout(false);
             tabNLP.PerformLayout();
-            tabDuality.ResumeLayout(false);
-            tabDuality.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -712,5 +829,16 @@
         private Button btnDualitySave;
         private Label label6;
         private RichTextBox rtbDualityOutput;
+        private TextBox txtRhs;
+        private TextBox txtCoeff;
+        private ComboBox cbRelation;
+        private Label label9;
+        private Label label8;
+        private Label label7;
+        private Button btnAddConstraint;
+        private Label label10;
+        private Button btnAddActivity;
+        private RichTextBox txtActivityValues;
+        private RichTextBox txtAddResult;
     }
 }
