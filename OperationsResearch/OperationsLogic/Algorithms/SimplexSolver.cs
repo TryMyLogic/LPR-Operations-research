@@ -14,6 +14,7 @@ namespace OperationsLogic.Algorithms
         public int NumDecisionVars { get; private set; } = 0;
         public int NumSlackVars { get; private set; } = 0;
         public int NumExcessVars { get; private set; } = 0;
+        public bool IsMax  { get; private set; } = false;
 
         // NEW: store the basis column indices (length = m)
         public int[] BasisIndices { get; private set; } = Array.Empty<int>();
@@ -35,6 +36,7 @@ namespace OperationsLogic.Algorithms
 
 
             bool isMax = model.Type == "max";
+            IsMax = isMax;
             List<double> objCoeffs = new List<double>(model.ObjectiveCoefficients);
             OriginalObjectiveCoeffs = new List<double>(model.ObjectiveCoefficients);
 
