@@ -1,46 +1,108 @@
 ﻿using System.Text;
 
+using OperationsLogic.Misc;
 using OperationsLogic.Model;
 
 namespace OperationsLogic.Algorithms;
 
-public class CuttingPlane
+public class CuttingPlane : ISolver
 {
+    public void Solve(LinearModel model, out string output)
+    {
+        CanonicalTableau tableau = ModelConverter.ConvertToCanonicalTableau(model);
+        output = Solve(tableau);
+    }
+
     public static string Solve(CanonicalTableau tableau)
     {
         StringBuilder sb = new();
-
         int iteration = 0;
+
+        while (true)
+        {
+            var (isOptimal, mode) = CanonicalTableau.IsOptimal(tableau);
+
+            if (!isOptimal)
+            {
+                sb.AppendLine("The table is not optimal. Optimizing");
+                iteration++;
+
+                CanonicalTableau? iterTableau;
+
+                if (mode == "Primal Simplex")
+                {
+                    LinearModel linearModel = ModelConverter.ConvertToLinearModel(tableau);
+                    SimplexSolver primalSolver = new();
+                    primalSolver.Solve(linearModel, out string primalOutput);
+                    double[,] updatedTableau = primalSolver.FinalTableau;
+
+                    int rows = updatedTableau.GetLength(0);
+                    int cols = updatedTableau.GetLength(1);
+                    double[,] displayTableau = (double[,])updatedTableau.Clone();
+
+                    // Swap Z row (last) to top since Josh has a preference for putting Z in the last row
+                    for (int col = 0; col < cols; col++)
+                    {
+                        (displayTableau[rows - 1, col], displayTableau[0, col]) = (displayTableau[0, col], displayTableau[rows - 1, col]);
+                    }
+
+                    iterTableau = new CanonicalTableau(
+                    decisionVars: tableau.DecisionVars,
+                    excessVars: tableau.ExcessVars,
+                    slackVars: tableau.SlackVars,
+                    isMaximization: tableau.IsMaximization,
+                    signRestrictions: tableau.SignRestrictions,
+                    tableau: displayTableau,
+                     noncanonicaltableau: tableau.NonCanonicalTableau
+                    );
+
+                    sb.AppendLine(primalOutput);
+                }
+                else
+                {
+                    (_, iterTableau) = DualSimplex.Solve(tableau, iteration);
+                }
+
+                tableau = iterTableau ?? throw new InvalidOperationException("Return table should not be null!");
+
+                sb.AppendLine(tableau.DisplayTableau());
+            }
+            else
+            {
+                break;
+            }
+        }
+
         while (true)
         {
             int cutRowIndex = DetermineCuttingRowIndex(tableau);
 
             if (iteration == 0)
             {
-                _ = sb.AppendLine("Initial Cutting Plane Tableau:");
+               sb.AppendLine("Initial Cutting Plane Tableau:");
             }
 
             if (cutRowIndex == -1)
             {
-                _ = sb.AppendLine($"Iteration {iteration}");
-                _ = sb.AppendLine("No further cuts needed or no valid cutting row found.");
+               sb.AppendLine($"Iteration {iteration}");
+                sb.AppendLine("No further cuts needed or no valid cutting row found.");
                 break;
             }
 
             string msg = $"Selected cutting row: {cutRowIndex}, RHS: {tableau.Tableau[cutRowIndex, tableau.TotalVars]}, Fractional part: {Math.Abs(tableau.Tableau[cutRowIndex, tableau.TotalVars] - Math.Floor(tableau.Tableau[cutRowIndex, tableau.TotalVars]))}";
-            _ = sb.AppendLine(msg);
+            sb.AppendLine(msg);
             _ = sb.AppendLine();
 
-            _ = sb.AppendLine($"Iteration {iteration}");
+            sb.AppendLine($"Iteration {iteration}");
             double[] newConstraint = DetermineCuttingConstraint(tableau, cutRowIndex);
             tableau = AddCutToTableau(tableau, newConstraint);
-            _ = sb.AppendLine(tableau.DisplayTableau());
+            sb.AppendLine(tableau.DisplayTableau());
 
             iteration++; // Count Dual Simplex as separate Iteration
             (string output, CanonicalTableau? iter) = DualSimplex.Solve(tableau, iteration);
             tableau = iter ?? throw new InvalidOperationException("Return table should not be null!");
 
-            _ = sb.AppendLine(output);
+            sb.AppendLine(output);
             iteration++;
         }
         return sb.ToString();

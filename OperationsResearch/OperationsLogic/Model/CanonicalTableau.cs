@@ -3,6 +3,7 @@
 using MathNet.Numerics.LinearAlgebra.Double;
 
 using OperationsLogic.Algorithms;
+using OperationsLogic.Misc;
 
 namespace OperationsLogic.Model;
 public class CanonicalTableau
@@ -180,9 +181,26 @@ public class CanonicalTableau
         IsMaximization = isMaximization;
         SignRestrictions = signRestrictions;
     }
-   
+
 
     #region Tableau manipulation
+    public static (bool, string model) IsOptimal(CanonicalTableau tableau)
+    {
+        // Check objective row for negative values. If obj negative, perform Primal Simplex
+        for (int col = 0; col < tableau.TotalVars; col++)
+        {
+            if (tableau.Tableau[0, col] < 0)
+                return (false, "Primal Simplex");
+        }
+
+        // Check RHS column for negative values. If RHS negative, perform Dual Simplex
+        double[] rhsColumn = tableau.GetColumn(tableau.TotalVars);
+        if (rhsColumn.Any(value => value < 0))
+            return (false, "Dual Simplex");
+
+        return (true, "");
+    }
+
     public string DisplayTableau(double[]? thetas = null, bool displayNonCanonical = false)
     {
         StringBuilder sb = new();
@@ -426,15 +444,61 @@ public class CanonicalTableau
         double[,] resultTable = tempTableau.ConstructMathPrelimOptimalTableau(result);
         CanonicalTableau resultInstance = new(newDecisionVars, ExcessVars, SlackVars, IsMaximization, newSignRestrictions, resultTable, newNonCanonicalTableau);
 
-        // The result may no longer be optimal
-        // TODO: Add check (negative values in Z - primal || negative values in RHS - dual)
+        while (true)
+        {
+            var (isOptimal, mode) = CanonicalTableau.IsOptimal(resultInstance);
+
+            if (!isOptimal)
+            {
+                CanonicalTableau? iterTableau;
+
+                if (mode == "Primal Simplex")
+                {
+                    LinearModel linearModel = ModelConverter.ConvertToLinearModel(resultInstance);
+                    SimplexSolver primalSolver = new();
+                    primalSolver.Solve(linearModel, out string primalOutput);
+                    double[,] updatedTableau = primalSolver.FinalTableau;
+
+                    int rows = updatedTableau.GetLength(0);
+                    int cols = updatedTableau.GetLength(1);
+                    double[,] displayTableau = (double[,])updatedTableau.Clone();
+
+                    // Swap Z row (last) to top since Josh has a preference for putting Z in the last row
+                    for (int col = 0; col < cols; col++)
+                    {
+                        (displayTableau[rows - 1, col], displayTableau[0, col]) = (displayTableau[0, col], displayTableau[rows - 1, col]);
+                    }
+
+                    iterTableau = new CanonicalTableau(
+                    decisionVars: resultInstance.DecisionVars,
+                    excessVars: resultInstance.ExcessVars,
+                    slackVars: resultInstance.SlackVars,
+                    isMaximization: resultInstance.IsMaximization,
+                    signRestrictions: resultInstance.SignRestrictions,
+                    tableau: displayTableau,
+                     noncanonicaltableau: resultInstance.NonCanonicalTableau
+                    );
+                }
+                else
+                {
+                    (_, iterTableau) = DualSimplex.Solve(resultInstance);
+                }
+
+                resultInstance = iterTableau ?? throw new InvalidOperationException("Return table should not be null!");
+
+            }
+            else
+            {
+                break;
+            }
+        }
 
         return resultInstance;
     }
     #endregion
 
     #region Utility Functions
-    private bool IsSlackVariable(int columnIndex)
+    public bool IsSlackVariable(int columnIndex)
     {
         // Since slack is always added after excess. Check index between
         return columnIndex >= DecisionVars + ExcessVars && columnIndex < TotalVars;
@@ -610,7 +674,7 @@ public class CanonicalTableau
         return optimalTableau;
     }
 
-    private MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
+    public MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
     {
         if (xBVIndices.Count == 0)
             throw new InvalidOperationException("No basic variables found in table");
