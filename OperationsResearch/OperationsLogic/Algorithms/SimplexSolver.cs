@@ -121,7 +121,7 @@ public class SimplexSolver : ISolver
 
         output = sb.ToString();
     }
-
+ 
     private void PrintTableau(double[,] tableau, StringBuilder sb)
     {
         int rows = tableau.GetLength(0);
