@@ -1,7 +1,9 @@
 ﻿using OperationsApp;
 
 using OperationsLogic.Algorithms;
+using OperationsLogic.Analysis;
 using OperationsLogic.Misc;
+using OperationsLogic.Model;
 
 namespace LPR381_Windows_Project;
 
@@ -9,6 +11,7 @@ public partial class SolverForm : Form
 {
     private LinearModel model;
     private string outputText = string.Empty;
+    private CanonicalTableau? tableauForSensitivity;
     private readonly Dictionary<string, ISolver> solvers = [];
 
     public SolverForm(LinearModel model1)
@@ -84,6 +87,57 @@ public partial class SolverForm : Form
             }
         }
     }
+    private CanonicalTableau BuildCanonicalTableauFromModel(LinearModel model)
+    {
+        int n = model.ObjectiveCoefficients.Count;
+        int m = model.Constraints.Count;
+        int slackCount = model.Constraints.Count(c => c.Relation == "<=");
+        int excessCount = model.Constraints.Count(c => c.Relation == ">=");
+
+        int totalVars = n + slackCount + excessCount;
+        double[,] tableau = new double[m + 1, totalVars + 1];
+        double[,] nonCanonical = new double[m + 1, totalVars + 1];
+
+        int slackIndex = 0;
+        int excessIndex = 0;
+        for (int i = 0; i < m; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                tableau[i + 1, j] = model.Constraints[i].Coefficients[j];
+                nonCanonical[i + 1, j] = model.Constraints[i].Coefficients[j];
+            }
+
+            string rel = model.Constraints[i].Relation;
+            double rhs = model.Constraints[i].RHS;
+            if (rel == "<=")
+            {
+                tableau[i + 1, n + excessCount + slackIndex] = 1;
+                nonCanonical[i + 1, n + excessCount + slackIndex] = 1;
+                slackIndex++;
+            }
+            else if (rel == ">=")
+            {
+                tableau[i + 1, n + excessIndex] = 1;
+                nonCanonical[i + 1, n + excessIndex] = -1;
+                excessIndex++;
+            }
+
+            tableau[i + 1, totalVars] = rhs;
+            nonCanonical[i + 1, totalVars] = rhs;
+        }
+
+        for (int j = 0; j < n; j++)
+        {
+            tableau[0, j] = -model.ObjectiveCoefficients[j]; 
+            nonCanonical[0, j] = model.ObjectiveCoefficients[j];
+        }
+        tableau[0, totalVars] = 0;
+        nonCanonical[0, totalVars] = 0;
+
+        return new CanonicalTableau(n, excessCount, slackCount, true, model.SignRestrictions, tableau, nonCanonical);
+    }
+
 
     private void SolveAndDisplay(string algorithm)
     {
@@ -98,6 +152,10 @@ public partial class SolverForm : Form
             try
             {
                 solver.Solve(model, out outputText);
+                if (algorithm == "Simplex Algorithm" || algorithm == "Revised Simplex Algorithm")
+                {
+                    tableauForSensitivity = BuildCanonicalTableauFromModel(model);
+                }
                 switch (algorithm)
                 {
                     case "Knapsack Branch and Bound Algorithm":
@@ -110,7 +168,15 @@ public partial class SolverForm : Form
             }
             catch (Exception ex)
             {
-                rtbOutput.Text = $"Error solving: {ex.Message}";
+                switch (algorithm)
+                {
+                    case "Knapsack Branch and Bound Algorithm":
+                        rtbBranchAndBound.Text = $"Error: {ex.Message}";
+                        break;
+                    default:
+                        rtbOutput.Text = $"Error: {ex.Message}";
+                        break;
+                }
             }
         }
         else
@@ -217,6 +283,45 @@ public partial class SolverForm : Form
 
     private void btnSensitivity_Click(object sender, EventArgs e)
     {
+        if (tableauForSensitivity == null)
+        {
+            _ = MessageBox.Show("Solve a model first using Simplex.", "Warning");
+            return;
+        }
 
+        var preliminaries = tableauForSensitivity.ComputeMathPreliminaries(
+            tableauForSensitivity.GetBasicVariableIndices());
+        SensitivityAnalysis sa = new SensitivityAnalysis(model, preliminaries);
+
+        int userVarNumber = (int)nudVarIndex.Value; 
+        if(userVarNumber == 0)
+        {
+            MessageBox.Show("Please input a valid variable index", "Error");
+            return;
+        }
+        int varIndex = userVarNumber - 1; 
+        
+
+        double newValue = (double)nudNewValue.Value;
+        if(newValue == 0)
+        {
+            MessageBox.Show("Please input a valid variable number", "Error");
+            return;
+        }
+
+        string output;
+
+        if (preliminaries.BasicVariableIndices.Contains(varIndex))
+        {
+            output = sa.ShowRangeBasic(varIndex) + Environment.NewLine;
+            output += sa.ApplyChangeBasic(varIndex, newValue); 
+        }
+        else
+        {
+            output = sa.ShowRangeNonBasic(varIndex) + Environment.NewLine;
+            output += sa.ApplyChangeNonBasic(varIndex, newValue); 
+        }
+
+        rtbSensitivity.Text = output;
     }
 }

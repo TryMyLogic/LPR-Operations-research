@@ -19,7 +19,7 @@ public class CanonicalTableau
 
     private static readonly string[] ValidOperatorsAndTypes = ["+", "-", "urs", "int", "bin"];
     private static readonly string[] ValidConstraintOperators = ["<=", ">=", "="];
-    public List<int> BasicVariableIndices { get; private set; } = [];
+    public List<int> BasicVariableIndices { get;  set; } = [];
 
     public CanonicalTableau() { }
 
@@ -610,7 +610,7 @@ public class CanonicalTableau
         return optimalTableau;
     }
 
-    private MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
+    public MathPreliminariesResult ComputeMathPreliminaries(List<int> xBVIndices)
     {
         if (xBVIndices.Count == 0)
             throw new InvalidOperationException("No basic variables found in table");
