@@ -59,7 +59,7 @@ public partial class SolverForm : Form
     private void btnB_B_Click(object sender, EventArgs e)
     {
 
-        SolveAndDisplayBandB("Branch And Bound Simplex Algorithm");
+        SolveAndDisplayBandB("Branch And Bound Simplex Algorithm", richTextBox1);
     }
 
     private void btnCuttingPlane_Click(object sender, EventArgs e)
@@ -132,7 +132,7 @@ public partial class SolverForm : Form
             targetBox.Text = "Algorithm not implemented.";
         }
     }
-    private void SolveAndDisplayBandB(string algorithm)
+    private void SolveAndDisplayBandB(string algorithm, RichTextBox? outputBox = null)
     {
         if (model == null)
         {
@@ -140,6 +140,7 @@ public partial class SolverForm : Form
             return;
         }
 
+        RichTextBox targetBox = outputBox ?? rtbOutput;
         if (solvers.TryGetValue(algorithm, out ISolver? solver))
         {
             try
@@ -163,18 +164,18 @@ public partial class SolverForm : Form
                 bab.B_BProcess(CanonicalTableau);
                 bab.CompletedBranches.ForEach(branch =>
                 {
-                    rtbOutput.Text += $"\nCompleted Branch - {branch.Status}\n";
-                    rtbOutput.Text += branch.Tableau.DisplayTableau() + "\n";
+                    targetBox.Text += $"\nCompleted Branch - {branch.Status}\n";
+                    targetBox.Text += branch.Tableau.DisplayTableau() + "\n";
                 });
             }
             catch (Exception ex)
             {
-                rtbOutput.Text = $"Error solving: {ex.Message}";
+                targetBox.Text = $"Error solving: {ex.Message}";
             }
         }
         else
         {
-            rtbOutput.Text = "Algorithm not implemented.";
+            targetBox.Text = "Algorithm not implemented.";
         }
     }
 
