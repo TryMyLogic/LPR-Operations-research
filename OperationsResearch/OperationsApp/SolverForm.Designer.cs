@@ -39,7 +39,7 @@
             button1 = new Button();
             tabCuttingPlane = new TabPage();
             label2 = new Label();
-            richTextBox2 = new RichTextBox();
+            cuttingPlaneTextbox = new RichTextBox();
             textBox2 = new TextBox();
             button7 = new Button();
             button5 = new Button();
@@ -291,7 +291,7 @@
             // 
             tabCuttingPlane.BackColor = SystemColors.ActiveCaption;
             tabCuttingPlane.Controls.Add(label2);
-            tabCuttingPlane.Controls.Add(richTextBox2);
+            tabCuttingPlane.Controls.Add(cuttingPlaneTextbox);
             tabCuttingPlane.Controls.Add(textBox2);
             tabCuttingPlane.Controls.Add(button7);
             tabCuttingPlane.Controls.Add(button5);
@@ -314,14 +314,14 @@
             label2.TabIndex = 19;
             label2.Text = "Preview LP Form; Canonical Form; Final Answer:\r\n";
             // 
-            // richTextBox2
+            // cuttingPlaneTextbox
             // 
-            richTextBox2.Location = new Point(280, 68);
-            richTextBox2.Margin = new Padding(4, 3, 4, 3);
-            richTextBox2.Name = "richTextBox2";
-            richTextBox2.Size = new Size(584, 707);
-            richTextBox2.TabIndex = 16;
-            richTextBox2.Text = "";
+            cuttingPlaneTextbox.Location = new Point(280, 68);
+            cuttingPlaneTextbox.Margin = new Padding(4, 3, 4, 3);
+            cuttingPlaneTextbox.Name = "cuttingPlaneTextbox";
+            cuttingPlaneTextbox.Size = new Size(584, 707);
+            cuttingPlaneTextbox.TabIndex = 16;
+            cuttingPlaneTextbox.Text = "";
             // 
             // textBox2
             // 
@@ -468,6 +468,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "SolverForm";
             WindowState = FormWindowState.Maximized;
+            Load += SolverForm_Load_1;
             tabControl1.ResumeLayout(false);
             tabSimplex.ResumeLayout(false);
             tabSimplex.PerformLayout();
@@ -505,7 +506,7 @@
         private TextBox textBox1;
         private Button button6;
         private Label label2;
-        private RichTextBox richTextBox2;
+        private RichTextBox cuttingPlaneTextbox;
         private TextBox textBox2;
         private Button button7;
         private TabPage tabSenAnalysis;
