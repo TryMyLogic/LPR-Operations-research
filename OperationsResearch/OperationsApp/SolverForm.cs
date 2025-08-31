@@ -1,8 +1,10 @@
 ﻿using OperationsApp;
 
 using OperationsLogic.Algorithms;
+using OperationsLogic.Analysis;
 using OperationsLogic.Bonus_NLP;
 using OperationsLogic.Misc;
+using OperationsLogic.Model;
 
 namespace LPR381_Windows_Project;
 
@@ -10,6 +12,7 @@ public partial class SolverForm : Form
 {
     private LinearModel model;
     private string outputText = string.Empty;
+    private CanonicalTableau? tableauForSensitivity;
     private readonly Dictionary<string, ISolver> solvers = [];
 
     private NonLinearProblem _nlpProblem;
@@ -64,7 +67,7 @@ public partial class SolverForm : Form
 
     private void btnB_B_B_Click(object sender, EventArgs e)
     {
-        SolveAndDisplay("Knapsack Branch and Bound Algorithm");
+        SolveAndDisplay("Knapsack Branch and Bound Algorithm", richTextBox1);
     }
 
     private void btnSaveLocation_Click(object sender, EventArgs e)
@@ -91,6 +94,72 @@ public partial class SolverForm : Form
             }
         }
     }
+    private CanonicalTableau BuildCanonicalTableauFromModel(LinearModel model)
+    {
+        int n = model.ObjectiveCoefficients.Count;
+        int m = model.Constraints.Count;
+
+        int slackCount = model.Constraints.Count(c => c.Relation == "<=");
+        int excessCount = model.Constraints.Count(c => c.Relation == ">=");
+
+        int totalVars = n + slackCount + excessCount;
+        double[,] tableau = new double[m + 1, totalVars + 1];
+        double[,] nonCanonical = new double[m + 1, totalVars + 1];
+
+        bool isMax = model.Type == "max";
+
+        int slackIndex = 0;
+        int excessIndex = 0;
+        for (int i = 0; i < m; i++)
+        {
+            var c = model.Constraints[i];
+            for (int j = 0; j < n; j++)
+            {
+                tableau[i, j] = c.Coefficients[j];
+                nonCanonical[i, j] = c.Coefficients[j];
+            }
+
+            if (c.Relation == "<=")
+            {
+                tableau[i, n + excessCount + slackIndex] = 1;
+                nonCanonical[i, n + excessCount + slackIndex] = 1;
+                slackIndex++;
+            }
+            else if (c.Relation == ">=")
+            {
+                tableau[i, n + excessIndex] = -1;
+                nonCanonical[i, n + excessIndex] = -1;
+                excessIndex++;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Constraint {i + 1} has unsupported relation {c.Relation}");
+            }
+
+            tableau[i, totalVars] = c.RHS;
+            nonCanonical[i, totalVars] = c.RHS;
+        }
+
+        for (int j = 0; j < n; j++)
+            tableau[m, j] = isMax ? -model.ObjectiveCoefficients[j] : model.ObjectiveCoefficients[j];
+
+        tableau[m, totalVars] = 0;
+
+        for (int j = 0; j < n; j++)
+            nonCanonical[m, j] = model.ObjectiveCoefficients[j];
+
+        nonCanonical[m, totalVars] = 0;
+
+        return new CanonicalTableau(
+            decisionVars: n,
+            excessVars: excessCount,
+            slackVars: slackCount,
+            isMaximization: isMax,
+            signRestrictions: model.SignRestrictions,
+            tableau: tableau,
+            noncanonicaltableau: nonCanonical
+        );
+    }
 
     private void SolveAndDisplay(string algorithm, RichTextBox? outputBox = null)
     {
@@ -108,6 +177,14 @@ public partial class SolverForm : Form
             {
                 solver.Solve(model, out outputText);
                 targetBox.Text = outputText;
+                if (solver is SimplexSolver)
+                {
+                    tableauForSensitivity = BuildCanonicalTableauFromModel(model);
+                }
+                else
+                {
+                    tableauForSensitivity = null;
+                }
             }
             catch (Exception ex)
             {
@@ -349,4 +426,62 @@ public partial class SolverForm : Form
     {
 
     }
+
+    private void btnSensitivity_Click(object sender, EventArgs e)
+    {
+        if (tableauForSensitivity == null)
+        {
+            MessageBox.Show("Solve a model first using Simplex.", "Warning");
+            return;
+        }
+
+        var basicIndices = tableauForSensitivity.GetBasicVariableIndices();
+        var preliminaries = tableauForSensitivity.ComputeMathPreliminaries(basicIndices);
+        SensitivityAnalysis sa = new SensitivityAnalysis(model, preliminaries);
+
+        int totalColumns = tableauForSensitivity.Tableau.GetLength(1) - 1;
+        int varIndex = (int)nudVarIndex.Value - 1;
+
+
+        if (varIndex < 0 || varIndex >= totalColumns)
+        {
+            MessageBox.Show(
+                $"Please input a valid variable index between 1 and {totalColumns}",
+                "Error");
+            return;
+        }
+
+        double newValue = (double)nudNewValue.Value;
+        if (newValue == 0)
+        {
+            MessageBox.Show("Please input a valid variable number", "Error");
+            return;
+        }
+
+        string output;
+
+        try
+        {
+            if (basicIndices.Contains(varIndex))
+            {
+                output = sa.ShowRangeBasic(varIndex) + Environment.NewLine +
+                         sa.ApplyChangeBasic(varIndex, newValue);
+            }
+            else
+            {
+                output = sa.ShowRangeNonBasic(varIndex) + Environment.NewLine +
+                         sa.ApplyChangeNonBasic(varIndex, newValue);
+            }
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            MessageBox.Show(
+                $"Variable x{varIndex + 1} no longer exists in the solved tableau (column removed).",
+                "Error");
+            return;
+        }
+
+        rtbSensitivity.Text = output;
+    }
 }
+
